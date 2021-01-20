@@ -1,13 +1,13 @@
 import Foundation
 
 /// Use this client when you want to communicate with APIs
-struct LindebrosApiClient {
+public struct LindebrosApiClient {
     /// The baseUrl to the API
     var baseURL: String
 
     private var logger: Logger
 
-    public init(baseURL: String, logLevel: LogLevel = .none) {
+    init(baseURL: String, logLevel: LogLevel = .none) {
         self.baseURL = baseURL
 
         logger = Logger(logLevel: logLevel)
@@ -16,14 +16,14 @@ struct LindebrosApiClient {
 
 // MARK: Public methods
 
-extension LindebrosApiClient {
+public extension LindebrosApiClient {
     /**
      Makes a request to the API.
 
      - parameter r: The request object that describes the API request
      - parameter completionHandler: The callback method to be invoked when the request is completed
      */
-    public func call<Model: Decodable, ErrorModel: ErrorResponse, RequestBodyModel: Encodable>(
+    func call<Model: Decodable, ErrorModel: ErrorResponse, RequestBodyModel: Encodable>(
         _ r: Request<Model, ErrorModel, RequestBodyModel>,
         bearerToken: String,
         completionHandler: @escaping (_ result: ApiResponse<Model, ErrorModel>) -> Void
