@@ -1,13 +1,13 @@
 import Foundation
 
 /// Common Error Protocol
-protocol ErrorResponse {
+public protocol ErrorResponse {
     var message: String? { get set }
 }
 
 /// Common Error Message
-struct ErrorMessage: Codable, ErrorResponse {
-    var message: String?
+public struct ErrorMessage: Codable, ErrorResponse {
+    public var message: String?
 }
 
-struct FileNotFound: Error {}
+public struct FileNotFound: Error {}

@@ -1,5 +1,5 @@
 
-enum HTTPStatusCode: Int {
+public enum HTTPStatusCode: Int {
     case unknown = 0
     // 100 Informational
     case `continue` = 100

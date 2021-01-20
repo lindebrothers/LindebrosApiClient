@@ -3,7 +3,7 @@ import Foundation
 /**
  The Request model that describes a request to the API.
  */
-struct Request<Model: Decodable, ErrorModel, RequestBodyModel: Encodable> {
+public struct Request<Model: Decodable, ErrorModel, RequestBodyModel: Encodable> {
     /// Describes the type of content of the body in the request
     enum ContentType {
         /// data will be encoded as application/x-www-form-urlencoded; charset=utf-8
@@ -40,11 +40,11 @@ struct Request<Model: Decodable, ErrorModel, RequestBodyModel: Encodable> {
     /// Should the API combine baseUrl with the endpoint?
     var isRelativeUrl: Bool
 
-    /// Should the API use the lower ranked token client credentials? If true, the client will try to fetch a new token if the API responds with 401 or 403.
-    var isClientCredentials: Bool
-
     /// if true, the client will print the entire response to the log.
     var debugData: Bool
+
+    /// Provides custom headers to the client. Overwrites defaults if duplications occurs
+    var customHeaders: [CustomHeader]?
     /**
      The Request model that describes a request to the API.
 
@@ -53,16 +53,15 @@ struct Request<Model: Decodable, ErrorModel, RequestBodyModel: Encodable> {
      - parameter data: The data to send in the request
      - parameter contentType: the content type of the data. json or form
      - parameter isRelativeUrl: Should the API combine baseUrl with the endpoint?
-     - parameter isClientCredentials: Should the API use the lower ranked token client credentials? If true, the client will try to fetch a new token if the API responds with 401 or 403.
      - parameter debugData: if true, the client will print the entire response to the log.
      */
-    init(endpoint: String, method: HttpMethod, data: RequestBodyModel? = nil, contentType: ContentType = .json, isRelativeUrl: Bool = true, isClientCredentials: Bool = true, debugData: Bool = false) {
+    init(endpoint: String, method: HttpMethod, data: RequestBodyModel? = nil, contentType: ContentType = .json, isRelativeUrl: Bool = true, debugData: Bool = false, customHeaders: [CustomHeader]? = nil) {
         self.endpoint = endpoint
         self.method = method
         self.isRelativeUrl = isRelativeUrl
-        self.isClientCredentials = isClientCredentials
         self.contentType = contentType
         self.debugData = debugData
+        self.customHeaders = customHeaders
 
         if self.method == .post || self.method == .put, let data = data {
             switch self.contentType {
@@ -88,4 +87,9 @@ struct Request<Model: Decodable, ErrorModel, RequestBodyModel: Encodable> {
     }
 }
 
-struct Empty: Codable {}
+public struct Empty: Codable {}
+
+public struct CustomHeader {
+    var key: String
+    var value: String
+}

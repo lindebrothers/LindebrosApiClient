@@ -1,7 +1,7 @@
 import Foundation
 
 /// The Http method to use in the request
-enum HttpMethod: String {
+public enum HttpMethod: String {
     /// The ApiClient makes a GET request without a body in the request
     case get = "GET"
 

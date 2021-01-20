@@ -5,12 +5,12 @@ struct LindebrosApiClient {
     /// The baseUrl to the API
     var baseURL: String
 
-    private var logger:Logger
-    
-    init(baseURL: String, logLevel: LogLevel = .none) {
+    private var logger: Logger
+
+    public init(baseURL: String, logLevel: LogLevel = .none) {
         self.baseURL = baseURL
-        
-        self.logger = Logger(logLevel: logLevel)
+
+        logger = Logger(logLevel: logLevel)
     }
 }
 
@@ -23,7 +23,11 @@ extension LindebrosApiClient {
      - parameter r: The request object that describes the API request
      - parameter completionHandler: The callback method to be invoked when the request is completed
      */
-    public func call<Model: Decodable, ErrorModel: ErrorResponse, RequestBodyModel: Encodable>(_ r: Request<Model, ErrorModel, RequestBodyModel>, bearerToken: String, completionHandler: @escaping (_ result: ApiResponse<Model, ErrorModel>) -> Void) {
+    public func call<Model: Decodable, ErrorModel: ErrorResponse, RequestBodyModel: Encodable>(
+        _ r: Request<Model, ErrorModel, RequestBodyModel>,
+        bearerToken: String,
+        completionHandler: @escaping (_ result: ApiResponse<Model, ErrorModel>) -> Void
+    ) {
         let session = URLSession.shared
         let endpointUrlStr = "\(r.isRelativeUrl ? baseURL : "")\(r.endpoint)"
         guard let endpointUrl = URL(string: endpointUrlStr) else {
@@ -37,6 +41,12 @@ extension LindebrosApiClient {
         request.timeoutInterval = 6
         request.addValue(r.contentType.header, forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer " + bearerToken, forHTTPHeaderField: "Authorization")
+
+        if let customHeaders = r.customHeaders {
+            customHeaders.forEach { customHeader in
+                request.addValue(customHeader.value, forHTTPHeaderField: customHeader.key)
+            }
+        }
 
         if let body = r.body {
             request.httpBody = body

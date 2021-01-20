@@ -19,7 +19,7 @@ public enum LogLevel: Int {
     }
 }
 
-struct Logger {
+public struct Logger {
     var logLevel: LogLevel
 
     func getFileName(_ path: String) -> String {
