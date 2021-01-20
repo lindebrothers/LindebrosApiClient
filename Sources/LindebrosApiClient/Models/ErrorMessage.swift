@@ -6,7 +6,7 @@ public protocol ErrorResponse {
 }
 
 /// Common Error Message
-public struct ErrorMessage: Codable, ErrorResponse {
+public struct ErrorMessage: Decodable, ErrorResponse {
     public var message: String?
 }
 

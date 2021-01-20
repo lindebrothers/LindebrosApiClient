@@ -1,7 +1,7 @@
 import Foundation
 
 /// The API response object. This is a wrapper that stores info about the API Response
-public struct ApiResponse<Model: Codable, ErrorModel: Codable> {
+public struct ApiResponse<Model: Decodable, ErrorModel: Decodable> {
     /// Was the Request successful?
     public var isOk: Bool
 
