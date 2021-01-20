@@ -36,17 +36,14 @@ public extension LindebrosApiClient {
             return
         }
 
-        let task = session.dataTask(with: request, completionHandler: { data, response, requestError in
-
+        session.dataTask(with: request) { data, response, requestError in
             let responseObject = bakeResponse(r: r, data: data, response: response, requestError: requestError)
 
             // We will continue to work on a background thread and let ApiClient switch back to the main thread.
             DispatchQueue.main.async {
                 completionHandler(responseObject)
             }
-        })
-
-        task.resume()
+        }.resume()
     }
 
     /**
@@ -63,12 +60,15 @@ public extension LindebrosApiClient {
 
         var responseObject: ApiResponse<Model, ErrorModel>!
 
-        DispatchQueue.global(qos: .background).async {
-            call(r, bearerToken: bearerToken) { response in
-                responseObject = response
-                semaphore.signal()
-            }
+        let session = URLSession.shared
+        guard let request = createURLRequest(r: r, bearerToken: bearerToken) else {
+            return ApiResponse(isOk: false, status: HTTPStatusCode.badRequest, data: nil, error: nil)
         }
+        session.dataTask(with: request) { data, response, requestError in
+            responseObject = bakeResponse(r: r, data: data, response: response, requestError: requestError)
+            semaphore.signal()
+        }.resume()
+
         _ = semaphore.wait(wallTimeout: .distantFuture)
 
         return responseObject
