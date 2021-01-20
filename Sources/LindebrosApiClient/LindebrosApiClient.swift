@@ -63,9 +63,11 @@ public extension LindebrosApiClient {
 
         var responseObject: ApiResponse<Model, ErrorModel>!
 
-        call(r, bearerToken: bearerToken) { response in
-            responseObject = response
-            semaphore.signal()
+        DispatchQueue.global(qos: .background).async {
+            call(r, bearerToken: bearerToken) { response in
+                responseObject = response
+                semaphore.signal()
+            }
         }
         _ = semaphore.wait(wallTimeout: .distantFuture)
 
