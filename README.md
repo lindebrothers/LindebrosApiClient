@@ -60,8 +60,3 @@ LindebrosApiClient is a client written in Swift. It is a `URLSession` implementa
         }
     }
    ```
-
-
-
-
-A description of this package.
