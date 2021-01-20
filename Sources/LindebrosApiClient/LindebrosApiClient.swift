@@ -7,7 +7,7 @@ public struct LindebrosApiClient {
 
     private var logger: Logger
 
-    init(baseURL: String, logLevel: LogLevel = .none) {
+    public init(baseURL: String, logLevel: LogLevel = .none) {
         self.baseURL = baseURL
 
         logger = Logger(logLevel: logLevel)
