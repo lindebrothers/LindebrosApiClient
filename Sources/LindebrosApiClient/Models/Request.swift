@@ -55,7 +55,7 @@ public struct Request<Model: Decodable, ErrorModel, RequestBodyModel: Encodable>
      - parameter isRelativeUrl: Should the API combine baseUrl with the endpoint?
      - parameter debugData: if true, the client will print the entire response to the log.
      */
-    init(endpoint: String, method: HttpMethod, data: RequestBodyModel? = nil, contentType: ContentType = .json, isRelativeUrl: Bool = true, debugData: Bool = false, customHeaders: [CustomHeader]? = nil) {
+    public init(endpoint: String, method: HttpMethod, data: RequestBodyModel? = nil, contentType: ContentType = .json, isRelativeUrl: Bool = true, debugData: Bool = false, customHeaders: [CustomHeader]? = nil) {
         self.endpoint = endpoint
         self.method = method
         self.isRelativeUrl = isRelativeUrl
