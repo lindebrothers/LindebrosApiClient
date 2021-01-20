@@ -30,13 +30,13 @@ public struct Request<Model: Decodable, ErrorModel, RequestBodyModel: Encodable>
      The Request model that describes a request to the API.
 
      - parameter endpoint: The endpoint to invoke
-     - parameter method: The HTTP method to use
+     - parameter method: The HTTP method to use. Default is .get
      - parameter data: The data to send in the request
      - parameter contentType: the content type of the data. json or form
      - parameter isRelativeUrl: Should the API combine baseUrl with the endpoint?
      - parameter debugData: if true, the client will print the entire response to the log.
      */
-    public init(endpoint: String, method: HttpMethod, data: RequestBodyModel? = nil, contentType: ContentType = .json, isRelativeUrl: Bool = true, debugData: Bool = false, customHeaders: [CustomHeader]? = nil) {
+    public init(endpoint: String, method: HttpMethod = .get, data: RequestBodyModel? = nil, contentType: ContentType = .json, isRelativeUrl: Bool = true, debugData: Bool = false, customHeaders: [CustomHeader]? = nil) {
         self.endpoint = endpoint
         self.method = method
         self.isRelativeUrl = isRelativeUrl

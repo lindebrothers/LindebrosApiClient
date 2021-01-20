@@ -43,7 +43,7 @@ LindebrosApiClient is a client written in Swift. It is a `URLSession` implementa
               logLevel: .debug
             )
 
-            let request = RequestModel<Response, Body, ErrorResonse>(
+            let request = RequestModel<Response, ErrorResonse, Body>(
               endpoint: "/some/endpoint",
               method: .post,
               data: Body(name: "Awesome", title: "Boss")

@@ -3,7 +3,7 @@ import Foundation
 /// Use this client when you want to communicate with APIs
 public struct LindebrosApiClient {
     /// The baseUrl to the API
-    var baseURL: String
+    public var baseURL: String
 
     private var logger: Logger
 
