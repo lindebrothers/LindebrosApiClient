@@ -5,25 +5,6 @@ import Foundation
  */
 public struct Request<Model: Decodable, ErrorModel, RequestBodyModel: Encodable> {
     /// Describes the type of content of the body in the request
-    enum ContentType {
-        /// data will be encoded as application/x-www-form-urlencoded; charset=utf-8
-        case form
-
-        /// data will be encoded as application/json; charset=utf-8
-        case json
-
-        case raw
-
-        /// String version of the content type to be used in the `Content-Type` header
-        var header: String {
-            switch self {
-            case .form:
-                return "application/x-www-form-urlencoded; charset=utf-8"
-            case .json, .raw:
-                return "application/json; charset=utf-8"
-            }
-        }
-    }
 
     /// The endpoint to invoke
     var endpoint: String
@@ -92,4 +73,24 @@ public struct Empty: Codable {}
 public struct CustomHeader {
     var key: String
     var value: String
+}
+
+public enum ContentType {
+    /// data will be encoded as application/x-www-form-urlencoded; charset=utf-8
+    case form
+
+    /// data will be encoded as application/json; charset=utf-8
+    case json
+
+    case raw
+
+    /// String version of the content type to be used in the `Content-Type` header
+    var header: String {
+        switch self {
+        case .form:
+            return "application/x-www-form-urlencoded; charset=utf-8"
+        case .json, .raw:
+            return "application/json; charset=utf-8"
+        }
+    }
 }
