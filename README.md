@@ -6,7 +6,7 @@ LindebrosClient is a client written in Swift. It is a `URLSession` implementatio
 1. Install the client using the Swift Package Manager.
     ```Swift
     dependencies: [
-        .package(url: "https://github.com/lindebrothers/LindebrosClient.git", .upToNextMajor(from: "2.0.0"))
+        .package(url: "https://github.com/lindebrothers/LindebrosClient.git", .upToNextMajor(from: "2.0.2"))
     ]
     ```
 ## How to use it
