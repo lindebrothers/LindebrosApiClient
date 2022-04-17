@@ -1,62 +1,175 @@
-# LindebrosApiClient
-LindebrosApiClient is a client written in Swift. It is a `URLSession` implementation that makes it easy and convenient to make requests to a backend server.
+# LindebrosClient
+LindebrosClient is a client written in Swift. It is a `URLSession` implementation that makes it easy and convenient to make requests to a backend server.
 
 
 ## Get Started
 1. Install the client using the Swift Package Manager.
     ```Swift
     dependencies: [
-        .package(url: "https://github.com/lindebrothers/LindebrosApiClient.git", .upToNextMajor(from: "1.0.0"))
+        .package(url: "https://github.com/lindebrothers/LindebrosClient.git", .upToNextMajor(from: "2.0.0"))
     ]
     ```
+## How to use it
 
-2. Include the The client where you want to use it in your project: Example.
-    ``` Swift
-    import LindebrosApiClient
+### GET requests
+``` Swift
+let config = Client.Configuration(baseURL: URL(string: "https://someapi.com")!)
 
-    class SomeClass {
-        func fetch() {
-            let client = LindebrosApiClient(
-                baseURL: "http://localhost",
-                logLevel: .debug
-            )
+do {
+    let model: Model? = try await Client(config).get("/hello/world")
+} catch let e {
+    // Handle errors
+}
+```
+Fetch with querystring params
+``` Swift
+let config = Client.Configuration(baseURL: URL(string: "https://someapi.com")!)
+let query = ParameterState(queryString: "a=b&c=d")
+do {
+    let model: Model? = try await Client(config).get("/hello/world", with: query)
+} catch let e {
+    // Handle errors
+}
+```
+
+### POST requests
+``` Swift
+let config = Client.Configuration(baseURL: URL(string: "https://someapi.com")!)
+
+struct PostData: Encodable {
+    var test: String
+} 
+do {
+    let model: Model? = try await Client(config)
+    .post(PostData(test: "Andy"), to: "/hello/world")
+} catch let e {
+    // Handle errors
+}
+```
+
+If you need to send a post request using form data you set `contentType` to `.form`. Default is `.json`
+
+``` Swift
+let config = Client.Configuration(baseURL: URL(string: "https://someapi.com")!)
+
+struct PostData: Encodable {
+    var test: String
+} 
+do {
+    let model: Model? = try await Client(config)
+    .post(PostData(test: "Andy"), to: "/hello/world", contentType: .form)
+} catch let e {
+    // Handle errors
+}
+```
+
+### PUT requests
+``` Swift
+let config = Client.Configuration(baseURL: URL(string: "https://someapi.com")!)
+
+struct PostData: Encodable {
+    var test: String
+} 
+do {
+    let model: Model? = try await Client(config).put(PostData(test: "Andy"), to: "/hello/world/1")
+} catch let e {
+    // Handle errors
+}
+```
+### Delete requests
+``` Swift
+let config = Client.Configuration(baseURL: URL(string: "https://someapi.com")!)
+struct PostData: Encodable {
+    var test: String
+} 
+do {
+    let model: Model? = try await Client(config).delete("/hello/world/1")
+} catch let e {
+    // Handle errors
+}
+```
+
+### Custom request
+If you need to create a custom request with custom headers you can use the `endpoint` function.
+``` Swift
+let config = Client.Configuration(baseURL: URL(string: "https://someapi.com")!)
+struct PostData: Encodable {
+    var test: String
+}
+do {
+    let model: Model? = try await Client(config)
+        .endpoint("/hello/world")
+        .setMethod(.post)
+        .setHeader(key: "Set-Cookie", value: "cool=awesome;")
+        .setContentType(.form)
+        .setBody(model: PostData(test: "Andy"))
+        .asyncRequest(urlSession: configuration.urlSession) // This function makes the request
+        
+} catch let e {
+    // Handle errors
+}
+```
+
+## Fetch client tokens for anonymous requests.
+The Client can fetch new client tokens automatically when the server responds with unauthorized (401) or forbidden (403). 
+The token model will be provided in the CredentialsProvider option of the configuration. The token can be stored to disc and be reused in the next request made by the client. When a new token has been retrieved, the client will retry and make the original request again. This behaviour is only for requests made by anonymous users. 401 or 403 responses to logged in users will receive Errors.
+
+To enable this, provide client credentals in the configuration.
+```Swift
+
+    class CredentialsManager: CredentialsProvider {
+        var credentials: Client.Credentials?
+
+        func provideCredentials() -> Client.Credentials? {
+            // credentials can here for example be fetched from keychain 
+            return credentials
+        }
+
+        func setCredentials(to credentials: Client.Credentials) {
+            // credentials can here be saved to for example keychain
+            self.credentials = credentials
         }
     }
-    ```
-3. Create a response model and a request model.
-    ``` Swift
-    import LindebrosApiClient
 
-    struct Response: Decodable {
-       var someProperty: String
-    }
+    let client = Client(Client.Configuration(
+        baseURL: URL(string: "https://someapi.com")!, 
+        clientCredentials: Client.ClientCredentials(
+            clientSecret: "abc",
+            clientId: "iphone"
+        ),
+        credentialsProvider: CredentialsManager()
+    ))
+```
 
-    struct Body: Encodable {
-       var name: String
-       var title: String
-    }
+## Mocking the Client
+You can mock the client by mocking the URLSession. In the configuration, apply your mockObject to the urlSession attribute in the configuration.
+```Swift
 
-    class SomeClass {
-        func fetch(bearerToken: String) {
-            let client = LindebrosApiClient(
-              baseURL: "http:localhost",
-              logLevel: .debug
-            )
-
-            let request = RequestModel<Response, ErrorResonse, Body>(
-              endpoint: "/some/endpoint",
-              method: .post,
-              data: Body(name: "Awesome", title: "Boss")
-            )
-
-            client.call(
-              request,
-              bearerToken: bearerToken
-            ) { response in
-              if response.isOk {
-                print(response.someProperty)
-              }
+struct URLSessionSpy: URLSessionProvider {
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .background).async {
+                do {
+                    let ad = try JSONEncoder().encode(Ad.generateAd())
+                    let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+                    continuation.resume(returning: (ad, urlResponse))
+                catch let e {
+                    continuation.resume(throwing: e)
+                }
             }
         }
     }
-   ```
+}
+
+let client = Client(Client.Configuration(
+    baseURL: URL(string: "https://someapi.io")!,
+    urlSession: URLSessionSpy(),
+    credentials: CredentialsMock.self
+))
+
+do {
+    let ad: Ad? = try await client.get("/annonser/123")
+} catch let e {
+    // Handle error
+}
+```

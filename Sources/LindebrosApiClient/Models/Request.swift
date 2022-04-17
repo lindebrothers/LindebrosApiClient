@@ -1,96 +1,87 @@
 import Foundation
+import os
 
-/**
- The Request model that describes a request to the API.
- */
-public struct Request<Model: Decodable, ErrorModel, RequestBodyModel: Encodable> {
-    /// Describes the type of content of the body in the request
+public extension Client {
+    struct Request: CustomStringConvertible {
+        public var urlRequest: URLRequest?
 
-    /// The endpoint to invoke
-    var endpoint: String
-
-    /// The HTTP method to use
-    var method: HttpMethod
-
-    /// The content type of the data. See ContentType object
-    var contentType: ContentType
-
-    /// The data to send in the request
-    var body: Data?
-
-    /// Should the API combine baseUrl with the endpoint?
-    var isRelativeUrl: Bool
-
-    /// if true, the client will print the entire response to the log.
-    var debugData: Bool
-
-    /// Provides custom headers to the client. Overwrites defaults if duplications occurs
-    var customHeaders: [CustomHeader]?
-    /**
-     The Request model that describes a request to the API.
-
-     - parameter endpoint: The endpoint to invoke
-     - parameter method: The HTTP method to use. Default is .get
-     - parameter data: The data to send in the request
-     - parameter contentType: the content type of the data. json or form
-     - parameter isRelativeUrl: Should the API combine baseUrl with the endpoint?
-     - parameter debugData: if true, the client will print the entire response to the log.
-     */
-    public init(endpoint: String, method: HttpMethod = .get, data: RequestBodyModel? = nil, contentType: ContentType = .json, isRelativeUrl: Bool = true, debugData: Bool = false, customHeaders: [CustomHeader]? = nil) {
-        self.endpoint = endpoint
-        self.method = method
-        self.isRelativeUrl = isRelativeUrl
-        self.contentType = contentType
-        self.debugData = debugData
-        self.customHeaders = customHeaders
-
-        if self.method == .post || self.method == .put, let data = data {
-            switch self.contentType {
-            case .json, .raw:
-                do {
-                    let encoder = JSONEncoder()
-                    encoder.keyEncodingStrategy = .convertToSnakeCase
-                    body = try encoder.encode(data)
-                } catch {}
-            case .form:
-                body = data.asQueryString.data(using: .utf8)
-            }
+        public init(url: URL?) {
+            guard let url = url else { return }
+            urlRequest = URLRequest(url: url)
         }
 
-        if self.method == .get, let data = data {
-            switch self.contentType {
-            case .raw:
-                self.endpoint = "\(self.endpoint)?\(data.asRawQueryString)"
-            default:
-                self.endpoint = "\(self.endpoint)?\(data.asQueryString)"
-            }
+        public init(
+            urlRequest: URLRequest
+        ) {
+            self.urlRequest = urlRequest
         }
-    }
-}
 
-public struct Empty: Codable {}
+        public func setHeader(key: String, value: String) -> Self {
+            guard var urlRequest = self.urlRequest else { return self }
+            urlRequest.setValue(value, forHTTPHeaderField: key)
+            return clone(with: urlRequest)
+        }
 
-public struct CustomHeader {
-    var key: String
-    var value: String
-}
+        public func setMethod(_ method: HttpMethod) -> Self {
+            guard var urlRequest = self.urlRequest else { return self }
+            urlRequest.httpMethod = method.rawValue
+            return clone(with: urlRequest)
+        }
 
-public enum ContentType {
-    /// data will be encoded as application/x-www-form-urlencoded; charset=utf-8
-    case form
+        public func setBody<Model: Encodable>(model: Model) -> Self {
+            guard var urlRequest = self.urlRequest else { return self }
 
-    /// data will be encoded as application/json; charset=utf-8
-    case json
+            switch HttpMethod(rawValue: urlRequest.httpMethod ?? "unknown") {
+            case .post, .put:
+                switch contentType {
+                case .json:
+                    do {
+                        let encoder = JSONEncoder()
+                        encoder.keyEncodingStrategy = .convertToSnakeCase
+                        urlRequest.httpBody = try encoder.encode(model)
+                    } catch {}
+                case .form:
+                    urlRequest.httpBody = model.asQueryString.data(using: .utf8)
+                case .none:
+                    break
+                }
 
-    case raw
+            case .get, .delete:
+                if let newURL = updateURL(with: QuerystringState(queryString: model.asRawQueryString)) {
+                    urlRequest.url = newURL
+                }
+            case .none:
+                break
+            }
 
-    /// String version of the content type to be used in the `Content-Type` header
-    var header: String {
-        switch self {
-        case .form:
-            return "application/x-www-form-urlencoded; charset=utf-8"
-        case .json, .raw:
-            return "application/json; charset=utf-8"
+            return clone(with: urlRequest)
+        }
+
+        public func setContentType(_ type: ContentType) -> Self {
+            setHeader(key: "Content-Type", value: type.rawValue)
+        }
+
+        public func setAcceptJSON() -> Self {
+            setHeader(key: "Accept", value: "application/json")
+        }
+
+        public func authenticate(by credentials: Credentials?) -> Self {
+            guard
+                let credential = credentials
+            else { return self }
+            return setHeader(key: "Authorization", value: "Bearer \(credential.accessToken)")
+        }
+
+        public var description: String {
+            guard
+                let urlRequest = self.urlRequest,
+                let url = urlRequest.url,
+                let method = HttpMethod(rawValue: urlRequest.httpMethod ?? "unknown")
+            else { return "invalid" }
+
+            let token = urlRequest.value(forHTTPHeaderField: "Authorization")
+
+            return "[\(method.rawValue)] \(url.path) \(url.query ?? "") \(token ?? "")"
         }
     }
 }
