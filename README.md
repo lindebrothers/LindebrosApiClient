@@ -134,8 +134,8 @@ To enable this, provide client credentals in the configuration.
     let client = Client(Client.Configuration(
         baseURL: URL(string: "https://someapi.com")!, 
         clientCredentials: Client.ClientCredentials(
-            clientSecret: "abc",
-            clientId: "iphone"
+            clientSecret: "123",
+            clientId: "abc"
         ),
         credentialsProvider: CredentialsManager()
     ))
@@ -150,9 +150,9 @@ struct URLSessionSpy: URLSessionProvider {
         try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .background).async {
                 do {
-                    let ad = try JSONEncoder().encode(Ad.generateAd())
+                    let model = try JSONEncoder().encode(Model())
                     let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
-                    continuation.resume(returning: (ad, urlResponse))
+                    continuation.resume(returning: (model, urlResponse))
                 catch let e {
                     continuation.resume(throwing: e)
                 }
@@ -168,7 +168,7 @@ let client = Client(Client.Configuration(
 ))
 
 do {
-    let ad: Ad? = try await client.get("/annonser/123")
+    let ad: Model? = try await client.get("/models/123")
 } catch let e {
     // Handle error
 }
