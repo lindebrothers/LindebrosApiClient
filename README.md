@@ -16,7 +16,7 @@ LindebrosClient is a client written in Swift. It is a `URLSession` implementatio
 let config = Client.Configuration(baseURL: URL(string: "https://someapi.com")!)
 
 do {
-    let model: Model? = try await Client(config).get("/hello/world")
+    let model: Model? = try await Client(config).get("/hello/world").dispatch()
 } catch let e {
     // Handle errors
 }
@@ -26,7 +26,7 @@ Fetch with querystring params
 let config = Client.Configuration(baseURL: URL(string: "https://someapi.com")!)
 let query = ParameterState(queryString: "a=b&c=d")
 do {
-    let model: Model? = try await Client(config).get("/hello/world", with: query)
+    let model: Model? = try await Client(config).get("/hello/world", with: query).dispatch()
 } catch let e {
     // Handle errors
 }
@@ -41,7 +41,7 @@ struct PostData: Encodable {
 } 
 do {
     let model: Model? = try await Client(config)
-    .post(PostData(test: "Andy"), to: "/hello/world")
+    .post(PostData(test: "Andy"), to: "/hello/world").dispatch()
 } catch let e {
     // Handle errors
 }
@@ -58,6 +58,7 @@ struct PostData: Encodable {
 do {
     let model: Model? = try await Client(config)
     .post(PostData(test: "Andy"), to: "/hello/world", contentType: .form)
+    .dispatch()
 } catch let e {
     // Handle errors
 }
@@ -71,7 +72,9 @@ struct PostData: Encodable {
     var test: String
 } 
 do {
-    let model: Model? = try await Client(config).put(PostData(test: "Andy"), to: "/hello/world/1")
+    let model: Model? = try await Client(config)
+    .put(PostData(test: "Andy"), to: "/hello/world/1")
+    .dispatch()
 } catch let e {
     // Handle errors
 }
@@ -83,10 +86,21 @@ struct PostData: Encodable {
     var test: String
 } 
 do {
-    let model: Model? = try await Client(config).delete("/hello/world/1")
+    let model: Model? = try await Client(config)
+    .delete("/hello/world/1")
+    .dispatch()
 } catch let e {
     // Handle errors
 }
+```
+### Set auth token
+``` Swift
+    let config = Client.Configuration(baseURL: URL(string: "https://someapi.com")!)
+    
+    let model: Model? = try await Client(config)
+    .get("/hello/world/1")
+    .authenticate(by: "abc")
+    .dispatch()
 ```
 
 ### Custom request
@@ -168,7 +182,7 @@ let client = Client(Client.Configuration(
 ))
 
 do {
-    let ad: Model? = try await client.get("/models/123")
+    let ad: Model? = try await client.get("/models/123").dispatch()
 } catch let e {
     // Handle error
 }

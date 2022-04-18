@@ -5,27 +5,32 @@ public extension Client {
     struct Request: CustomStringConvertible {
         public var urlRequest: URLRequest?
 
+        var config: Configuration?
+
         public init(url: URL?) {
             guard let url = url else { return }
             urlRequest = URLRequest(url: url)
+            config = nil
         }
 
         public init(
-            urlRequest: URLRequest
+            urlRequest: URLRequest,
+            config: Configuration? = nil
         ) {
             self.urlRequest = urlRequest
+            self.config = config
         }
 
         public func setHeader(key: String, value: String) -> Self {
             guard var urlRequest = self.urlRequest else { return self }
             urlRequest.setValue(value, forHTTPHeaderField: key)
-            return clone(with: urlRequest)
+            return clone(with: urlRequest, andConfig: config)
         }
 
         public func setMethod(_ method: HttpMethod) -> Self {
             guard var urlRequest = self.urlRequest else { return self }
             urlRequest.httpMethod = method.rawValue
-            return clone(with: urlRequest)
+            return clone(with: urlRequest, andConfig: config)
         }
 
         public func setBody<Model: Encodable>(model: Model) -> Self {
@@ -54,7 +59,7 @@ public extension Client {
                 break
             }
 
-            return clone(with: urlRequest)
+            return clone(with: urlRequest, andConfig: config)
         }
 
         public func setContentType(_ type: ContentType) -> Self {
@@ -70,6 +75,15 @@ public extension Client {
                 let credential = credentials
             else { return self }
             return setHeader(key: "Authorization", value: "Bearer \(credential.accessToken)")
+        }
+
+        public func authenticate(by token: String) -> Self {
+            return setHeader(key: "Authorization", value: "Bearer \(token)")
+        }
+
+        public func setConfig(_ config: Configuration) -> Self {
+            guard let urlRequest = self.urlRequest else { return self }
+            return clone(with: urlRequest, andConfig: config)
         }
 
         public var description: String {

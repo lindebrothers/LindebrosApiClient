@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import SwiftUI
 
 extension Client.Request {
     private func logResponse(of url: URL?, with status: Client.HttpStatusCode) {
@@ -7,14 +8,16 @@ extension Client.Request {
         Client.ClientLogger.shared.info("✅ [\(status.rawValue)] \(path)")
     }
 
-    func dispatch<Model: Decodable>(
-        with configuration: Client.Configuration
-    ) async throws -> Model? {
+    @MainActor public func dispatch<Model: Decodable>() async throws -> Model? {
         Client.ClientLogger.shared.info(self)
 
         // Make the request
         do {
-            let response: Client.Response<Model> = try await asyncRequest(urlSession: configuration.urlSession)
+            guard let config = config else {
+                throw Client.ErrorResponse(message: "Configuration is not provided", status: .unknown)
+            }
+
+            let response: Client.Response<Model> = try await asyncRequest(urlSession: config.urlSession)
 
             logResponse(of: urlRequest?.url, with: response.status)
             return response.model
@@ -22,28 +25,30 @@ extension Client.Request {
         } catch let e {
             // If client credentials token has expired, fetch a new token and make the request again.
             if
+
                 let errorResponse = e as? Client.ErrorResponse,
                 errorResponse.status == .unauthorized || errorResponse.status == .forbidden,
-                configuration.credentialsProvider?.provideCredentials()?.isUserCredential ?? false == false,
-                let clientCredentials = configuration.clientCredentials {
+                let config = config,
+                config.credentialsProvider?.provideCredentials()?.isUserCredential ?? false == false,
+                let clientCredentials = config.clientCredentials {
                 Client.ClientLogger.shared.info("🔑 fetching new token")
 
-                let loginResponse: Client.Response<Client.Credentials> = try await Client(configuration: configuration)
+                let loginResponse: Client.Response<Client.Credentials> = try await Client(configuration: config)
                     .endpoint("/auth/v1/oauth/tokens")
                     .setMethod(.post)
                     .setContentType(.form)
                     .setBody(model: clientCredentials)
-                    .asyncRequest(urlSession: configuration.urlSession)
+                    .asyncRequest(urlSession: config.urlSession)
 
                 guard let credentials = loginResponse.model else {
                     // Could not fetch a new client, cannot continue making second request attempt
                     throw e
                 }
                 Client.ClientLogger.shared.info("✅ Received new token")
-                configuration.credentialsProvider?.setCredentials(to: credentials)
+                config.credentialsProvider?.setCredentials(to: credentials)
 
                 // Make the requeat again
-                let response: Client.Response<Model> = try await authenticate(by: configuration.credentialsProvider?.provideCredentials()).asyncRequest(urlSession: configuration.urlSession)
+                let response: Client.Response<Model> = try await authenticate(by: config.credentialsProvider?.provideCredentials()).asyncRequest(urlSession: config.urlSession)
                 logResponse(of: urlRequest?.url, with: response.status)
                 return response.model
             }
@@ -96,7 +101,7 @@ public extension Client.Request {
 
         urlRequest.url = newURL
 
-        return clone(with: urlRequest)
+        return clone(with: urlRequest, andConfig: config)
     }
 }
 
@@ -107,8 +112,8 @@ extension Client.Request {
         return Client.ContentType(rawValue: contentType)
     }
 
-    func clone(with urlRequest: URLRequest) -> Self {
-        Client.Request(urlRequest: urlRequest)
+    func clone(with urlRequest: URLRequest, andConfig config: Client.Configuration?) -> Self {
+        Client.Request(urlRequest: urlRequest, config: config)
     }
 
     func updateURL(with newQuery: QuerystringState) -> URL? {

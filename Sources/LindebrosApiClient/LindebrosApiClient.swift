@@ -1,13 +1,13 @@
 import Foundation
 
 public protocol ClientProvider {
-    func get<Model: Decodable>(_ endpoint: String, with state: QuerystringState?) async throws -> Model?
+    func get(_ endpoint: String, with state: QuerystringState?) -> Client.Request
 
-    func post<PostModel: Encodable, Model: Decodable>(_ model: PostModel, to endpoint: String, contentType: Client.ContentType) async throws -> Model?
+    func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, contentType: Client.ContentType) -> Client.Request
 
-    func put<PutModel: Encodable, Model: Decodable>(_ model: PutModel, to endpoint: String, contentType: Client.ContentType) async throws -> Model?
+    func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, contentType: Client.ContentType) -> Client.Request
 
-    func delete<Model: Decodable>(_ endpoint: String, with state: QuerystringState?) async throws -> Model?
+    func delete(_ endpoint: String, with state: QuerystringState?) -> Client.Request
 }
 
 public struct Client: ClientProvider {
@@ -35,13 +35,12 @@ public struct Client: ClientProvider {
      - parameter with state: Querystring parameter representation
      - returns Model with populated data
      */
-    @MainActor public func get<Model: Decodable>(_ endpoint: String, with state: QuerystringState? = nil) async throws -> Model? {
-        try await Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+    public func get(_ endpoint: String, with state: QuerystringState? = nil) -> Request {
+        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
             .setQueryIfNeeded(with: state)
             .setMethod(.get)
             .setAcceptJSON()
-            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
-            .dispatch(with: configuration)
+            .setConfig(configuration)
     }
 
     /**
@@ -51,14 +50,13 @@ public struct Client: ClientProvider {
      - parameter contentType: The type of data, json or form.
      - returns Model with populated data
      */
-    @MainActor public func post<PostModel: Encodable, Model: Decodable>(_ model: PostModel, to endpoint: String, contentType: ContentType = .json) async throws -> Model? {
-        try await Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+    public func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, contentType: ContentType = .json) -> Request {
+        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
             .setMethod(.post)
             .setContentType(contentType)
             .setBody(model: model)
             .setAcceptJSON()
-            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
-            .dispatch(with: configuration)
+            .setConfig(configuration)
     }
 
     /**
@@ -68,14 +66,13 @@ public struct Client: ClientProvider {
      - parameter contentType: The type of data, json or form.
      - returns Model with populated data
      */
-    @MainActor public func put<PutModel: Encodable, Model: Decodable>(_ model: PutModel, to endpoint: String, contentType: ContentType = .json) async throws -> Model? {
-        try await Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+    public func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, contentType: ContentType = .json) -> Request {
+        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
             .setMethod(.put)
             .setContentType(contentType)
             .setBody(model: model)
             .setAcceptJSON()
-            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
-            .dispatch(with: configuration)
+            .setConfig(configuration)
     }
 
     /**
@@ -84,13 +81,12 @@ public struct Client: ClientProvider {
      - parameter with state: Querystring parameter representation
      - returns Model with populated data
      */
-    @MainActor public func delete<Model: Decodable>(_ endpoint: String, with state: QuerystringState? = nil) async throws -> Model? {
-        try await Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+    public func delete(_ endpoint: String, with state: QuerystringState? = nil) -> Request {
+        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
             .setQueryIfNeeded(with: state)
             .setMethod(.delete)
             .setAcceptJSON()
-            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
-            .dispatch(with: configuration)
+            .setConfig(configuration)
     }
 
     /**

@@ -57,7 +57,7 @@ class ApiClientTests: XCTestCase {
         ))
 
         do {
-            let model: Model? = try await client.get("/awesome")
+            let model: Model? = try await client.get("/awesome").dispatch()
             XCTAssertTrue(Thread.current.isMainThread)
 
             XCTAssertEqual(model?.label ?? "not known", "Awesome")
