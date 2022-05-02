@@ -76,7 +76,7 @@ public extension Client.Request {
         let httpStatus = Client.HttpStatusCode(rawValue: response?.statusCode ?? 0) ?? .unknown
 
         let jsonDecoder = JSONDecoder()
-
+        jsonDecoder.keyDecodingStrategy = config?.keydecodingStrategy ?? .convertFromSnakeCase
         if httpStatus.isOk() {
             if data.count > 0 {
                 return Client.Response(
