@@ -1,7 +1,7 @@
 import Foundation
 
 public extension Client {
-    enum HttpStatusCode: Int {
+    enum HttpStatusCode: Int, Codable {
         case unknown = 0
         // 100 Informational
         case `continue` = 100

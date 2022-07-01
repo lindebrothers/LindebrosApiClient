@@ -6,7 +6,7 @@ public extension Client {
         let status: HttpStatusCode
     }
 
-    struct ErrorResponse: Error {
+    struct ErrorResponse: Error, Codable {
         public init(message: String? = nil, status: HttpStatusCode, data: Data? = nil) {
             self.message = message
             self.status = status
