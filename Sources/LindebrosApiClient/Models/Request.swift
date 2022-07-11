@@ -19,6 +19,10 @@ public extension Client {
         ) {
             self.urlRequest = urlRequest
             self.config = config
+
+            if let timeout = config?.timeout {
+                self.urlRequest?.timeoutInterval = timeout
+            }
         }
 
         public func setHeader(key: String, value: String) -> Self {
@@ -96,6 +100,11 @@ public extension Client {
             let token = urlRequest.value(forHTTPHeaderField: "Authorization")
 
             return "[\(method.rawValue)] \(url.path) \(url.query ?? "") \(token ?? "")"
+        }
+
+        public func modifyURLRequest(_ closure: (URLRequest) -> URLRequest) -> Self {
+            guard let urlRequest = self.urlRequest else { return self }
+            return clone(with: closure(urlRequest), andConfig: config)
         }
     }
 }
