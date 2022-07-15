@@ -60,6 +60,13 @@ extension Client.Request {
 }
 
 public extension Client.Request {
+    func asyncRequest<Model: Decodable>() async throws -> Client.Response<Model> {
+        guard let config = self.config else {
+            throw Client.ErrorResponse(message: "Configuration is not provided", status: .unknown)
+        }
+        return try await self.asyncRequest(urlSession: config.urlSession)
+    }
+
     func asyncRequest<Model: Decodable>(urlSession: URLSessionProvider) async throws -> Client.Response<Model> {
         guard let urlRequest = urlRequest else {
             throw Client.ErrorResponse(message: "Invalid URL", status: .badRequest)
