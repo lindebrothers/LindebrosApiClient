@@ -2,8 +2,8 @@ import Foundation
 
 public extension Client {
     struct Response<Model> {
-        let model: Model?
-        let status: HttpStatusCode
+        public let model: Model?
+        public let status: HttpStatusCode
     }
 
     struct ErrorResponse: Error, Codable {
