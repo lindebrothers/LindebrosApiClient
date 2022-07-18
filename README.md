@@ -125,13 +125,12 @@ do {
 ```
 
 ## Fetch client tokens for anonymous requests.
-The Client can fetch new client tokens automatically when the server responds with unauthorized (401) or forbidden (403). 
-The token model will be provided in the CredentialsProvider option of the configuration. The token can be stored to disc and be reused in the next request made by the client. When a new token has been retrieved, the client will retry and make the original request again. This behaviour is only for requests made by anonymous users. 401 or 403 responses to logged in users will receive Errors.
+The Client can call a authenticator service when the server responds with unauthorized (401) or forbidden (403).
 
 To enable this, provide client credentals in the configuration.
 ```Swift
 
-    class CredentialsManager: CredentialsProvider {
+    class CredentialsManager: CredentialsProvider, AuthenticatorProvider {
         var credentials: Client.Credentials?
 
         func provideCredentials() -> Client.Credentials? {
@@ -143,15 +142,17 @@ To enable this, provide client credentals in the configuration.
             // credentials can here be saved to for example keychain
             self.credentials = credentials
         }
+        
+        func fetchNewCredentials() async -> Client.Credentials? {
+            // make login request and return Client.Credentials
+            return Client.Credentials()
+        }
     }
 
     let client = Client(Client.Configuration(
         baseURL: URL(string: "https://someapi.com")!, 
-        clientCredentials: Client.ClientCredentials(
-            clientSecret: "123",
-            clientId: "abc"
-        ),
-        credentialsProvider: CredentialsManager()
+        credentialsProvider: CredentialsManager(),
+        authenticator: CredentialsManager()
     ))
 ```
 

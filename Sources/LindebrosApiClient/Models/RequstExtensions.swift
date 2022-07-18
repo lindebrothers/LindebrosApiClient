@@ -29,23 +29,10 @@ extension Client.Request {
                 let errorResponse = e as? Client.ErrorResponse,
                 errorResponse.status == .unauthorized || errorResponse.status == .forbidden,
                 let config = config,
-                config.credentialsProvider?.provideCredentials()?.isUserCredential ?? false == false,
-                let clientCredentials = config.clientCredentials {
-                Client.ClientLogger.shared.info("🔑 fetching new token")
-
-                let loginResponse: Client.Response<Client.Credentials> = try await Client(configuration: config)
-                    .endpoint("/auth/v1/oauth/tokens")
-                    .setMethod(.post)
-                    .setContentType(.form)
-                    .setBody(model: clientCredentials)
-                    .asyncRequest(urlSession: config.urlSession)
-
-                guard let credentials = loginResponse.model else {
-                    // Could not fetch a new client, cannot continue making second request attempt
-                    throw e
-                }
-                Client.ClientLogger.shared.info("✅ Received new token")
-                config.credentialsProvider?.setCredentials(to: credentials)
+                let authenticator = config.authenticator,
+                let newCredentials = await authenticator.fetchNewCredentials() {
+                Client.ClientLogger.shared.info("🔑 Received new token")
+                config.credentialsProvider?.setCredentials(to: newCredentials)
 
                 // Make the requeat again
                 let response: Client.Response<Model> = try await authenticate(by: config.credentialsProvider?.provideCredentials()).asyncRequest(urlSession: config.urlSession)
@@ -64,7 +51,7 @@ public extension Client.Request {
         guard let config = self.config else {
             throw Client.ErrorResponse(message: "Configuration is not provided", status: .unknown)
         }
-        return try await self.asyncRequest(urlSession: config.urlSession)
+        return try await asyncRequest(urlSession: config.urlSession)
     }
 
     func asyncRequest<Model: Decodable>(urlSession: URLSessionProvider) async throws -> Client.Response<Model> {
