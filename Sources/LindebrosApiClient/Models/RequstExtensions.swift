@@ -29,8 +29,8 @@ extension Client.Request {
                 let errorResponse = e as? Client.ErrorResponse,
                 errorResponse.status == .unauthorized || errorResponse.status == .forbidden,
                 let config = config,
-                let authenticator = config.authenticator,
-                let newCredentials = await authenticator.fetchNewCredentials() {
+                let credentialsProvider = config.credentialsProvider,
+                let newCredentials = await credentialsProvider.fetchNewCredentials() {
                 Client.ClientLogger.shared.info("🔑 Received new token")
                 config.credentialsProvider?.setCredentials(to: newCredentials)
 

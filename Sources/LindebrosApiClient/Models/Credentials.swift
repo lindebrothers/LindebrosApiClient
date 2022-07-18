@@ -51,19 +51,5 @@ extension Client.Credentials: CustomStringConvertible {
 public protocol CredentialsProvider {
     func provideCredentials() -> Client.Credentials?
     func setCredentials(to: Client.Credentials) -> Void
-}
-
-public extension Client {
-    struct ClientCredentials: Codable {
-        public init(
-            clientSecret: String,
-            clientId: String
-        ) {
-            self.clientSecret = clientSecret
-            self.clientId = clientId
-        }
-
-        public var clientSecret, clientId: String
-        public var grantType = "client_credentials"
-    }
+    func fetchNewCredentials() async -> Client.Credentials?
 }

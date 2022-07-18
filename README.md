@@ -151,8 +151,7 @@ To enable this, provide client credentals in the configuration.
 
     let client = Client(Client.Configuration(
         baseURL: URL(string: "https://someapi.com")!, 
-        credentialsProvider: CredentialsManager(),
-        authenticator: CredentialsManager()
+        credentialsProvider: CredentialsManager()
     ))
 ```
 
