@@ -37,6 +37,7 @@ public struct Client: ClientProvider {
      */
     public func get(_ endpoint: String, with state: QuerystringState? = nil) -> Request {
         Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
             .setQueryIfNeeded(with: state)
             .setMethod(.get)
             .setAcceptJSON()
@@ -52,6 +53,7 @@ public struct Client: ClientProvider {
      */
     public func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, contentType: ContentType = .json) -> Request {
         Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
             .setMethod(.post)
             .setContentType(contentType)
             .setBody(model: model)
@@ -68,6 +70,7 @@ public struct Client: ClientProvider {
      */
     public func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, contentType: ContentType = .json) -> Request {
         Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
             .setMethod(.put)
             .setContentType(contentType)
             .setBody(model: model)
@@ -83,6 +86,7 @@ public struct Client: ClientProvider {
      */
     public func delete(_ endpoint: String, with state: QuerystringState? = nil) -> Request {
         Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
             .setQueryIfNeeded(with: state)
             .setMethod(.delete)
             .setAcceptJSON()
