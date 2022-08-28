@@ -112,19 +112,23 @@ extension Client.Request {
 
     func updateURL(with newQuery: QuerystringState) -> URL? {
         guard
-            let urlRequest = self.urlRequest
+            let urlString = urlRequest?.url?.absoluteString,
+            var components = URLComponents(string: urlString)
         else {
             return nil
         }
-        let query = QuerystringState(queryString: urlRequest.url?.query ?? "")
-            .clone(overwriteWith: newQuery.keyValues).asQueryString
+        let state = QuerystringState(queryString: components.query ?? "")
+            .clone(overwriteWith: newQuery.keyValues)
 
-        if let newURL = URL(
-            string: "\(urlRequest.url?.scheme ?? "")://\(urlRequest.url?.host ?? "")\(urlRequest.url?.path ?? "")\(query.count > 0 ? "?" : "")\(query)")
-        {
-            return newURL
+        components.queryItems = state.asURLQueryItems
+
+        return components.url
+    }
+
+    private func port(of reguest: URLRequest) -> String {
+        if let port = reguest.url?.port {
+            return "\(port)"
         }
-
-        return nil
+        return ""
     }
 }

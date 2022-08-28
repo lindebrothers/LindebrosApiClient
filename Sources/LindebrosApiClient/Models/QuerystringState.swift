@@ -111,6 +111,16 @@ public extension QuerystringState {
         let output = keyValues.sorted { ($0.key < $1.key) }.map { Self.queryStringItems(key: $0.key, value: $0.value) }.flatMap { $0 }
         return output.joined(separator: "&")
     }
+
+    /**
+     URLQueryItems representation of the state.
+     */
+    var asURLQueryItems: [URLQueryItem] {
+        keyValues
+            .sorted { ($0.key < $1.key) }
+            .map { Self.asUrlQueryItems(key: $0.key, value: $0.value) }
+            .flatMap { $0 }
+    }
 }
 
 // MARK: Static functions
@@ -152,5 +162,28 @@ private extension QuerystringState {
             }
         }
         return strings
+    }
+
+    /**
+     Builds up an array of URLQueryItems representation of Keyvalues
+
+     - parameter key: identifier for the keyValues
+     - parameter value: the value of the key
+     - returns an array of URLQueryItems
+     */
+    static func asUrlQueryItems(key: String, value: Any) -> [URLQueryItem] {
+        var urlQueryItems = [URLQueryItem]()
+
+        switch value {
+        case let items as Set<String>:
+            for item in items.sorted(by: { ($0 < $1) }) {
+                urlQueryItems.append(contentsOf: Self.asUrlQueryItems(key: key, value: item))
+            }
+        default:
+            if let value = value as? String {
+                urlQueryItems.append(URLQueryItem(name: key, value: value))
+            }
+        }
+        return urlQueryItems
     }
 }

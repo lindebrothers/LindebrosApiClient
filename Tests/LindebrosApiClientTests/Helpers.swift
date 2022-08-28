@@ -1,6 +1,10 @@
 @testable import LindebrosApiClient
 
 class CredentialsProviderSpy: CredentialsProvider {
+    func fetchNewCredentials() async -> Client.Credentials? {
+        return Client.Credentials(accessToken: "awesome")
+    }
+
     var credentials: Client.Credentials?
 
     func provideCredentials() -> Client.Credentials? {

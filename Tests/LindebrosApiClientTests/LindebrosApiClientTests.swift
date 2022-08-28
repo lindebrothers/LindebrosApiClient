@@ -2,10 +2,20 @@
 import SwiftUI
 import XCTest
 
+class ClientRequestTests: XCTestCase {
+    func testURLManagement() throws {
+        let request = Client.Request(url: URL(string: "https://www.lindebros.com:43/awesome?a=b"))
+            .updateURL(with: QuerystringState(queryString: "c=d&e=f"))
+
+        XCTAssertEqual(try XCTUnwrap(request?.absoluteString), "https://www.lindebros.com:43/awesome?a=b&c=d&e=f")
+    }
+}
+
 struct Model: Codable {
     var label: String
     var secondLabel: String
 }
+
 class URLSessionSpy: URLSessionProvider {
     var requests: [URLRequest] = []
 
