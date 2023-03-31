@@ -1,7 +1,7 @@
 import Foundation
 
 public extension Client {
-    struct Configuration {
+    struct Configuration: Sendable {
         public init(
             baseURL: URL,
             credentialsProvider: CredentialsProvider? = nil,

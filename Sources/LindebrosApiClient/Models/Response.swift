@@ -1,12 +1,12 @@
 import Foundation
 
 public extension Client {
-    struct Response<Model> {
+    struct Response<Model: Sendable>: Sendable {
         public let model: Model?
         public let status: HttpStatusCode
     }
 
-    struct ErrorResponse: Error, Codable {
+    struct ErrorResponse: Error, Sendable, Codable {
         public init(message: String? = nil, status: HttpStatusCode, data: Data? = nil) {
             self.message = message
             self.status = status
@@ -18,5 +18,5 @@ public extension Client {
         public var data: Data?
     }
 
-    struct EmptyResponse: Codable {}
+    struct EmptyResponse: Sendable, Codable {}
 }

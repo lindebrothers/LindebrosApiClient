@@ -1,7 +1,7 @@
 import Foundation
 
 public extension Client {
-    enum HttpMethod: String {
+    enum HttpMethod: String, Sendable {
         /// The ApiClient makes a GET request without a body in the request
         case get = "GET"
 

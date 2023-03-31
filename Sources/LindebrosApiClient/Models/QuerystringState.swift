@@ -1,6 +1,6 @@
 import Foundation
 
-public struct QuerystringState: Hashable {
+public struct QuerystringState: Sendable, Hashable {
     public init(keyValues: [String: Set<String>] = [:]) {
         self.keyValues = keyValues
     }

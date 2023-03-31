@@ -61,10 +61,6 @@ public extension Client.Request {
 
         let (data, resp) = try await urlSession.data(for: urlRequest)
 
-        if Thread.current.isMainThread {
-            assertionFailure("request was made on the main thread")
-        }
-
         let response = resp as? HTTPURLResponse
 
         let httpStatus = Client.HttpStatusCode(rawValue: response?.statusCode ?? 0) ?? .unknown

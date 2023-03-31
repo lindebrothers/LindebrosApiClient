@@ -1,6 +1,7 @@
 import LindebrosApiClient
 import SwiftUI
 
+@MainActor
 struct ContentView: View {
     let client: Client
     init() {
@@ -17,7 +18,7 @@ struct ContentView: View {
         state = .loading
         Task {
             do {
-                if let model: TestModel = try await client.get("/awesome/LindebrosApiClient").dispatch() {
+                if let model: TestModel = try await self.client.get("/awesome/LindebrosApiClient").dispatch() {
                     self.state = .success(model)
                 }
             } catch {

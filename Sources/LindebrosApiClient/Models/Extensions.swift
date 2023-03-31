@@ -71,7 +71,7 @@ extension Dictionary {
     }
 }
 
-public protocol URLSessionProvider {
+public protocol URLSessionProvider: Sendable {
     func data(for request: URLRequest) async throws -> (Data, URLResponse)
 }
 

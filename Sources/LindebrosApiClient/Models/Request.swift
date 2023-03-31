@@ -2,7 +2,7 @@ import Foundation
 import os
 
 public extension Client {
-    struct Request: CustomStringConvertible {
+    struct Request: Sendable, CustomStringConvertible {
         public var urlRequest: URLRequest?
 
         var config: Configuration?

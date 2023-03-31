@@ -1,7 +1,7 @@
 import Foundation
 
 public extension Client {
-    struct Credentials: Codable {
+    struct Credentials: Sendable, Codable {
         public init(
             accessToken: String,
             tokenType: String = "",
@@ -48,7 +48,7 @@ extension Client.Credentials: CustomStringConvertible {
 
 // MARK: - Keychain
 
-public protocol CredentialsProvider {
+public protocol CredentialsProvider: Sendable {
     func provideCredentials() -> Client.Credentials?
     func setCredentials(to: Client.Credentials) -> Void
     func fetchNewCredentials() async -> Client.Credentials?

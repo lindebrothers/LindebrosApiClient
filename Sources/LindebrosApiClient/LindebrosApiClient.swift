@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol ClientProvider {
+public protocol ClientProvider: Sendable {
     func get(_ endpoint: String, with state: QuerystringState?) -> Client.Request
 
     func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, contentType: Client.ContentType) -> Client.Request
