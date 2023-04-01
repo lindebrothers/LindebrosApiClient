@@ -1,13 +1,13 @@
 import Foundation
 
 public protocol ClientProvider: Sendable {
-    func get(_ endpoint: String, with state: QuerystringState?) -> Client.Request
+    func get(_ endpoint: String, with state: QuerystringState?) async -> Client.Request
 
-    func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, contentType: Client.ContentType) -> Client.Request
+    func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, contentType: Client.ContentType) async -> Client.Request
 
-    func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, contentType: Client.ContentType) -> Client.Request
+    func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, contentType: Client.ContentType) async -> Client.Request
 
-    func delete(_ endpoint: String, with state: QuerystringState?) -> Client.Request
+    func delete(_ endpoint: String, with state: QuerystringState?) async -> Client.Request
 }
 
 public struct Client: ClientProvider {
@@ -35,9 +35,9 @@ public struct Client: ClientProvider {
      - parameter with state: Querystring parameter representation
      - returns Model with populated data
      */
-    public func get(_ endpoint: String, with state: QuerystringState? = nil) -> Request {
+    public func get(_ endpoint: String, with state: QuerystringState? = nil) async -> Request {
         Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
-            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
+            .authenticate(by: await configuration.credentialsProvider?.provideCredentials())
             .setQueryIfNeeded(with: state)
             .setMethod(.get)
             .setAcceptJSON()
@@ -51,9 +51,9 @@ public struct Client: ClientProvider {
      - parameter contentType: The type of data, json or form.
      - returns Model with populated data
      */
-    public func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, contentType: ContentType = .json) -> Request {
+    public func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, contentType: ContentType = .json) async -> Request {
         Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
-            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
+            .authenticate(by: await configuration.credentialsProvider?.provideCredentials())
             .setMethod(.post)
             .setContentType(contentType)
             .setBody(model: model)
@@ -68,9 +68,9 @@ public struct Client: ClientProvider {
      - parameter contentType: The type of data, json or form.
      - returns Model with populated data
      */
-    public func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, contentType: ContentType = .json) -> Request {
+    public func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, contentType: ContentType = .json) async -> Request {
         Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
-            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
+            .authenticate(by: await configuration.credentialsProvider?.provideCredentials())
             .setMethod(.put)
             .setContentType(contentType)
             .setBody(model: model)
@@ -84,9 +84,9 @@ public struct Client: ClientProvider {
      - parameter with state: Querystring parameter representation
      - returns Model with populated data
      */
-    public func delete(_ endpoint: String, with state: QuerystringState? = nil) -> Request {
+    public func delete(_ endpoint: String, with state: QuerystringState? = nil) async -> Request {
         Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
-            .authenticate(by: configuration.credentialsProvider?.provideCredentials())
+            .authenticate(by: await configuration.credentialsProvider?.provideCredentials())
             .setQueryIfNeeded(with: state)
             .setMethod(.delete)
             .setAcceptJSON()
@@ -98,7 +98,7 @@ public struct Client: ClientProvider {
      - parameter endpoint: Path to endpoint
      - returns a Request
      */
-    public func endpoint(_ endpoint: String) -> Request {
+    public func endpoint(_ endpoint: String) async -> Request {
         Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
     }
 }

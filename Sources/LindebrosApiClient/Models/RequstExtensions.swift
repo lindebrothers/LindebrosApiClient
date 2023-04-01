@@ -32,7 +32,7 @@ extension Client.Request {
                 let credentialsProvider = config.credentialsProvider,
                 let newCredentials = await credentialsProvider.fetchNewCredentials() {
                 Client.ClientLogger.shared.info("🔑 Received new token")
-                config.credentialsProvider?.setCredentials(to: newCredentials)
+                await config.credentialsProvider?.setCredentials(to: newCredentials)
 
                 // Make the requeat again
                 let response: Client.Response<Model> = try await authenticate(by: config.credentialsProvider?.provideCredentials()).asyncRequest(urlSession: config.urlSession)

@@ -49,7 +49,7 @@ extension Client.Credentials: CustomStringConvertible {
 // MARK: - Keychain
 
 public protocol CredentialsProvider: Sendable {
-    func provideCredentials() -> Client.Credentials?
-    func setCredentials(to: Client.Credentials) -> Void
+    func provideCredentials() async -> Client.Credentials?
+    func setCredentials(to: Client.Credentials) async -> Void
     func fetchNewCredentials() async -> Client.Credentials?
 }
