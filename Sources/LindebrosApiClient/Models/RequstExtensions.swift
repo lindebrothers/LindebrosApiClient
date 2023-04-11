@@ -66,6 +66,9 @@ public extension Client.Request {
         let httpStatus = Client.HttpStatusCode(rawValue: response?.statusCode ?? 0) ?? .unknown
 
         let jsonDecoder = JSONDecoder()
+        if let strategy = config?.nonConformingFloatStrategy, case let JSONEncoder.NonConformingFloatEncodingStrategy.convertToString(positiveInfinity, negativeInfinity, nan) = strategy {
+            jsonDecoder.nonConformingFloatDecodingStrategy = .convertFromString(positiveInfinity: positiveInfinity, negativeInfinity: negativeInfinity, nan: nan)
+        }
         jsonDecoder.keyDecodingStrategy = config?.keydecodingStrategy ?? .convertFromSnakeCase
         if httpStatus.isOk() {
             if data.count > 0 {

@@ -46,6 +46,9 @@ public extension Client {
                 case .json:
                     do {
                         let encoder = JSONEncoder()
+                        if let strategy = config?.nonConformingFloatStrategy {
+                            encoder.nonConformingFloatEncodingStrategy = strategy
+                        }
                         encoder.keyEncodingStrategy = keyEncodingStrategy
                         urlRequest.httpBody = try encoder.encode(model)
                     } catch {}
