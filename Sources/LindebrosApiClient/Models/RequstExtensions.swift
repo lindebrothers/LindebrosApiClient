@@ -8,7 +8,7 @@ extension Client.Request {
         Client.ClientLogger.shared.info("✅ [\(status.rawValue)] \(path)")
     }
 
-    @MainActor public func dispatch<Model: Decodable>() async throws -> Model? {
+    public func dispatch<Model: Decodable>() async throws -> Model? {
         Client.ClientLogger.shared.info(self)
 
         // Make the request
