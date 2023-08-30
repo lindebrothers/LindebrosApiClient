@@ -70,6 +70,7 @@ public extension Client.Request {
             jsonDecoder.nonConformingFloatDecodingStrategy = .convertFromString(positiveInfinity: positiveInfinity, negativeInfinity: negativeInfinity, nan: nan)
         }
         jsonDecoder.keyDecodingStrategy = config?.keydecodingStrategy ?? .convertFromSnakeCase
+        jsonDecoder.dateDecodingStrategy = config?.dateDecodingStrategy ?? .deferredToDate
         if httpStatus.isOk() {
             if data.count > 0 {
                 return Client.Response(

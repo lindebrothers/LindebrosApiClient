@@ -7,6 +7,7 @@ public extension Client {
             credentialsProvider: CredentialsProvider? = nil,
             urlSession: URLSessionProvider = URLSession.shared,
             keydecodingStrategy: JSONDecoder.KeyDecodingStrategy = .convertFromSnakeCase,
+            dateDecodingStrategy: JSONDecoder.DateDecodingStrategy = .iso8601,
             nonConformingFloatStrategy: JSONEncoder.NonConformingFloatEncodingStrategy = .convertToString(
                 positiveInfinity: "+Infinity", negativeInfinity: "-Infinity", nan: "Nan"
             ),
@@ -16,6 +17,7 @@ public extension Client {
             self.urlSession = urlSession
             self.credentialsProvider = credentialsProvider
             self.keydecodingStrategy = keydecodingStrategy
+            self.dateDecodingStrategy = dateDecodingStrategy
             self.nonConformingFloatStrategy = nonConformingFloatStrategy
             self.timeout = timeout
         }
@@ -24,6 +26,7 @@ public extension Client {
         public let credentialsProvider: CredentialsProvider?
         public let urlSession: URLSessionProvider
         public let keydecodingStrategy: JSONDecoder.KeyDecodingStrategy
+        public let dateDecodingStrategy: JSONDecoder.DateDecodingStrategy
         public let nonConformingFloatStrategy: JSONEncoder.NonConformingFloatEncodingStrategy
         public let timeout: TimeInterval?
     }
