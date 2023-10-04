@@ -187,3 +187,54 @@ do {
     // Handle error
 }
 ```
+
+
+## Websocket client
+LindebrosApiClient comes with a websocket client as well as a http client.
+Here's an example of an implementation of the websocket client
+``` Swift
+import SwiftUI
+import Combine
+
+class ContentViewModel: ObservableObject {
+    init() {
+        webSocketClient = WebSocketClient(config: .init())
+        subscriber = webSocketClient.events.sink { [weak self] event in
+            switch event{
+            case .stateChanged:
+                print("state changed to", self?.webSocketClient.state ?? .disconnected)
+            case let .received(message):
+                print("received message", message)
+            }
+        }
+    }
+    
+    let webSocketClient: WebSocketClient
+    private var subscriber: Cancellable?
+}
+
+struct ContentView: View {
+    let viewModel = ContentViewModel()
+
+    var body: some View {
+        VStack {
+            Button(action: {
+                Task {
+                    do {
+                        try await viewModel.webSocketClient.send(message: "Awesome")
+                    } catch {
+                        print("💥, Failed to send message with error", error)
+                    }
+                }
+            }) {
+                Text("Send to websocket")
+            }
+        }
+        .frame(width: 400, height: 300)
+        .onAppear {
+            let url = URL(string: "ws://localhost:8080/socket")!
+            viewModel.webSocketClient.dispatch(.connect(to: url))
+        }
+    }
+ }
+ ```

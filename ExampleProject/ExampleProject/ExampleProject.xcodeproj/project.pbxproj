@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E863F372ACD40BD0011C21E /* WebSocketContentVIew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E863F362ACD40BD0011C21E /* WebSocketContentVIew.swift */; };
 		E65469A6280B0A4700EEBB5B /* ExampleProjectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E65469A5280B0A4700EEBB5B /* ExampleProjectApp.swift */; };
 		E65469A8280B0A4700EEBB5B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E65469A7280B0A4700EEBB5B /* ContentView.swift */; };
 		E65469AA280B0A4800EEBB5B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E65469A9280B0A4800EEBB5B /* Assets.xcassets */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E863F362ACD40BD0011C21E /* WebSocketContentVIew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketContentVIew.swift; sourceTree = "<group>"; };
 		E65469A2280B0A4700EEBB5B /* ExampleProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExampleProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E65469A5280B0A4700EEBB5B /* ExampleProjectApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleProjectApp.swift; sourceTree = "<group>"; };
 		E65469A7280B0A4700EEBB5B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -62,6 +64,7 @@
 				E65469A9280B0A4800EEBB5B /* Assets.xcassets */,
 				E65469AE280B0A4800EEBB5B /* ExampleProject.entitlements */,
 				E65469AB280B0A4800EEBB5B /* Preview Content */,
+				1E863F362ACD40BD0011C21E /* WebSocketContentVIew.swift */,
 			);
 			path = ExampleProject;
 			sourceTree = "<group>";
@@ -120,7 +123,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1330;
-				LastUpgradeCheck = 1330;
+				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					E65469A1280B0A4700EEBB5B = {
 						CreatedOnToolsVersion = 13.3.1;
@@ -162,6 +165,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E863F372ACD40BD0011C21E /* WebSocketContentVIew.swift in Sources */,
 				E65469A8280B0A4700EEBB5B /* ContentView.swift in Sources */,
 				E65469A6280B0A4700EEBB5B /* ExampleProjectApp.swift in Sources */,
 			);
@@ -203,9 +207,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -227,6 +233,7 @@
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
 			};
 			name = Debug;
 		};
@@ -263,9 +270,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -280,6 +289,7 @@
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
 			};
 			name = Release;
 		};
@@ -292,6 +302,7 @@
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"ExampleProject/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -321,6 +332,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"ExampleProject/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;

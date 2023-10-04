@@ -31,3 +31,26 @@ public extension Client {
         public let timeout: TimeInterval?
     }
 }
+
+public extension WebSocketClient {
+    struct Configuration: Sendable {
+        public init(
+            pingPongType: WebSocketClient.PingPongType = .timeInterval(500),
+            urlSessionConfig: URLSessionConfiguration = URLSessionConfiguration.default,
+            verbose: Bool = true
+        ) {
+            self.pingPongType = pingPongType
+            self.urlSessionConfig = urlSessionConfig
+            self.verbose = verbose
+        }
+
+        public let urlSessionConfig: URLSessionConfiguration
+        public let pingPongType: PingPongType
+        public let verbose: Bool
+    }
+
+    enum PingPongType: Sendable {
+        case none
+        case timeInterval(TimeInterval)
+    }
+}
