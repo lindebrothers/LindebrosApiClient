@@ -108,7 +108,7 @@ public extension QuerystringState {
      Querystring representation of the state.
      */
     var asQueryString: String {
-        let output = keyValues.sorted { ($0.key < $1.key) }.map { Self.queryStringItems(key: $0.key, value: $0.value) }.flatMap { $0 }
+        let output = keyValues.sorted { $0.key < $1.key }.map { Self.queryStringItems(key: $0.key, value: $0.value) }.flatMap { $0 }
         return output.joined(separator: "&")
     }
 
@@ -117,8 +117,15 @@ public extension QuerystringState {
      */
     var asURLQueryItems: [URLQueryItem] {
         keyValues
-            .sorted { ($0.key < $1.key) }
+            .sorted { $0.key < $1.key }
             .map { Self.asUrlQueryItems(key: $0.key, value: $0.value) }
+            .flatMap { $0 }
+    }
+
+    var asURLQueryItemsPercentageEncoded: [URLQueryItem] {
+        keyValues
+            .sorted { $0.key < $1.key }
+            .map { Self.asUrlQueryItems(key: $0.key, value: $0.value, asPercentEncoded: true) }
             .flatMap { $0 }
     }
 }
@@ -153,7 +160,7 @@ private extension QuerystringState {
 
         switch value {
         case let items as Set<String>:
-            for item in items.sorted(by: { ($0 < $1) }) {
+            for item in items.sorted(by: { $0 < $1 }) {
                 strings.append(contentsOf: Self.queryStringItems(key: key, value: item))
             }
         default:
@@ -171,19 +178,37 @@ private extension QuerystringState {
      - parameter value: the value of the key
      - returns an array of URLQueryItems
      */
-    static func asUrlQueryItems(key: String, value: Any) -> [URLQueryItem] {
+    static func asUrlQueryItems(key: String, value: Any, asPercentEncoded: Bool = false) -> [URLQueryItem] {
         var urlQueryItems = [URLQueryItem]()
 
         switch value {
         case let items as Set<String>:
-            for item in items.sorted(by: { ($0 < $1) }) {
-                urlQueryItems.append(contentsOf: Self.asUrlQueryItems(key: key, value: item))
+            for item in items.sorted(by: { $0 < $1 }) {
+                urlQueryItems.append(contentsOf: Self.asUrlQueryItems(key: key, value: item, asPercentEncoded: asPercentEncoded))
             }
         default:
             if let value = value as? String {
-                urlQueryItems.append(URLQueryItem(name: key, value: value))
+                urlQueryItems.append(URLQueryItem(name: key, value: value).asPercentEncoded(asPercentEncoded))
             }
         }
         return urlQueryItems
+    }
+}
+
+private extension URLQueryItem {
+    func asPercentEncoded(_ encode: Bool) -> URLQueryItem {
+        if !encode {
+            return self
+        }
+        /// addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) encode parameters following RFC 3986
+        /// which we need to encode other special characters correctly.
+        /// We then also encode "+" sign with its HTTP equivalent
+
+        var newQueryItem = self
+        newQueryItem.value = value?
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)?
+            .replacingOccurrences(of: "+", with: "%2B")
+
+        return newQueryItem
     }
 }

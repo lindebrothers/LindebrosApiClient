@@ -15,4 +15,11 @@ class QueryStringStateTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(state.asURLQueryItems.last).name, "d")
         XCTAssertEqual(try XCTUnwrap(state.asURLQueryItems.last).value, "e")
     }
+
+    func testAsURLQueryStringEscapedItems() throws {
+        let state = QuerystringState().set("date", value: ["2024-08-05T10:00:00.000+0200"])
+
+        XCTAssertEqual(try XCTUnwrap(state.asURLQueryItemsPercentageEncoded.first).name, "date")
+        XCTAssertEqual(try XCTUnwrap(state.asURLQueryItemsPercentageEncoded.first).value, "2024-08-05T10:00:00.000%2B0200")
+    }
 }

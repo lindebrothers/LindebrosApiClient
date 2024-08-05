@@ -30,7 +30,8 @@ extension Client.Request {
                 errorResponse.status == .unauthorized || errorResponse.status == .forbidden,
                 let config = config,
                 let credentialsProvider = config.credentialsProvider,
-                let newCredentials = await credentialsProvider.fetchNewCredentials() {
+                let newCredentials = await credentialsProvider.fetchNewCredentials()
+            {
                 Client.ClientLogger.shared.info("🔑 Received new token")
                 await config.credentialsProvider?.setCredentials(to: newCredentials)
 
@@ -48,7 +49,7 @@ extension Client.Request {
 
 public extension Client.Request {
     func asyncRequest<Model: Decodable>() async throws -> Client.Response<Model> {
-        guard let config = self.config else {
+        guard let config = config else {
             throw Client.ErrorResponse(message: "Configuration is not provided", status: .unknown)
         }
         return try await asyncRequest(urlSession: config.urlSession)
@@ -73,8 +74,8 @@ public extension Client.Request {
         jsonDecoder.dateDecodingStrategy = config?.dateDecodingStrategy ?? .deferredToDate
         if httpStatus.isOk() {
             if data.count > 0 {
-                return Client.Response(
-                    model: try jsonDecoder.decode(Model.self, from: data),
+                return try Client.Response(
+                    model: jsonDecoder.decode(Model.self, from: data),
                     status: httpStatus
                 )
             }
@@ -86,7 +87,7 @@ public extension Client.Request {
 
     func setQueryIfNeeded(with state: QuerystringState? = nil) -> Self {
         guard
-            var urlRequest = self.urlRequest,
+            var urlRequest = urlRequest,
             let state = state,
             let newURL = updateURL(with: state)
         else {
@@ -101,7 +102,7 @@ public extension Client.Request {
 
 extension Client.Request {
     var contentType: Client.ContentType? {
-        guard let urlRequest = self.urlRequest else { return nil }
+        guard let urlRequest = urlRequest else { return nil }
         guard let contentType = urlRequest.allHTTPHeaderFields?.filter({ $0.key == "Content-Type" }).map({ $0.value }).first else { return nil }
         return Client.ContentType(rawValue: contentType)
     }
@@ -120,7 +121,7 @@ extension Client.Request {
         let state = QuerystringState(queryString: components.query ?? "")
             .clone(overwriteWith: newQuery.keyValues)
 
-        components.queryItems = state.asURLQueryItems
+        components.percentEncodedQueryItems = state.asURLQueryItemsPercentageEncoded
 
         return components.url
     }
