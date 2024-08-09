@@ -1,6 +1,6 @@
 import Foundation
 
-public struct QuerystringState: Sendable, Hashable {
+public struct QuerystringState: Sendable, Hashable, Codable {
     public init(keyValues: [String: Set<String>] = [:]) {
         self.keyValues = keyValues
     }
@@ -14,6 +14,7 @@ extension QuerystringState: Equatable {
         return lhs.keyValues == rhs.keyValues
     }
 }
+
 
 // MARK: Public methods
 
