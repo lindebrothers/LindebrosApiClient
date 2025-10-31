@@ -1,105 +1,23 @@
 import Foundation
 
-public protocol ClientLoggerProvider {
-    func publish(message: String, obj: [Any], level: Client.ClientLogger.LogLevel)
+public protocol ApiLogger: Sendable {
+    func debug(_ values: Any?..., file: StaticString, line: UInt)
+    func info(_ values: Any?..., file: StaticString, line: UInt)
+    func warning(_ values: Any?..., file: StaticString, line: UInt)
+    func error(_ values: Any?..., file: StaticString, line: UInt)
 }
 
-public extension Client {
-    struct ClientLoggerMock: ClientLoggerProvider {
-        public init() {}
-        public func publish(message: String, obj: [Any], level: Client.ClientLogger.LogLevel) {}
+extension ApiLogger {
+    func debug(_ values: Any?..., file: StaticString = #file, line: UInt = #line) {
+        debug(values, file: file, line: line)
     }
-
-    struct ClientLogger: ClientLoggerProvider {
-        public var logLevel: ClientLogger.LogLevel {
-#if DEBUG
-            return .debug
-#else
-            return .none
-#endif
-        }
-
-        static let shared = ClientLogger()
-
-        public init() {}
-
-        public static func getFileName(_ path: String?) -> String {
-            guard let path = path else { return "" }
-            return (path as NSString).lastPathComponent.components(separatedBy: ".")[0]
-        }
-
-        public static func getFunctionName(_ name: String?) -> String {
-            guard let name = name else { return "" }
-            return name.components(separatedBy: "(")[0]
-        }
-
-        public func debug(_ obj: Any..., functionName: String? = #function, line: Int? = #line, path: String? = #file) {
-            let lineStr = line != nil ? "[\(line ?? 0)]" : ""
-            publish(
-                message: "\(ClientLogger.getFileName(path)).\(ClientLogger.getFunctionName(functionName))\(lineStr):",
-
-                obj: obj,
-                level: .debug
-            )
-        }
-
-        public func info(_ obj: Any..., functionName: String? = #function, line: Int? = #line, path: String? = #file) {
-            let lineStr = line != nil ? "[\(line ?? 0)]" : ""
-            publish(
-                message: "\(ClientLogger.getFileName(path)).\(ClientLogger.getFunctionName(functionName))\(lineStr):",
-                obj: obj,
-                level: .info
-            )
-        }
-
-        public func warning(_ obj: Any..., functionName: String? = #function, line: Int? = #line, path: String? = #file) {
-            let lineStr = line != nil ? "[\(line ?? 0)]" : ""
-            publish(
-                message: "\(ClientLogger.getFileName(path)).\(ClientLogger.getFunctionName(functionName))\(lineStr):",
-                obj: obj,
-                level: .warning
-            )
-        }
-
-        public func error(_ obj: Any..., functionName: String? = #function, line: Int? = #line, path: String? = #file) {
-            let lineStr = line != nil ? "[\(line ?? 0)]" : ""
-            publish(
-                message: "\(ClientLogger.getFileName(path)).\(ClientLogger.getFunctionName(functionName))\(lineStr):",
-                obj: obj,
-                level: .error
-            )
-        }
-
-        public func publish(message: String, obj: [Any], level: LogLevel) {
-            guard level.rawValue >= logLevel.rawValue else {
-                return
-            }
-            print("Client: \(level.getEmoj()) ", terminator: "")
-            for item in obj {
-                print(item, terminator: "")
-            }
-            print("")
-        }
+    func info(_ values: Any?..., file: StaticString = #file, line: UInt = #line) {
+        info(values, file: file, line: line)
     }
-}
-
-public extension Client.ClientLogger {
-    enum LogLevel: Int {
-        case none, debug, info, warning, error
-
-        func getEmoj() -> String {
-            switch self {
-            case .debug:
-                return "🏷"
-            case .info:
-                return "💬"
-            case .warning:
-                return "⚠️"
-            case .error:
-                return "❌"
-            default:
-                return ""
-            }
-        }
+    func warning(_ values: Any?..., file: StaticString = #file, line: UInt = #line) {
+        warning(values, file: file, line: line)
+    }
+    func error(_ values: Any?..., file: StaticString = #file, line: UInt = #line) {
+        error(values, file: file, line: line)
     }
 }

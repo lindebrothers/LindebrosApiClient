@@ -11,7 +11,8 @@ public extension Client {
             nonConformingFloatStrategy: JSONEncoder.NonConformingFloatEncodingStrategy = .convertToString(
                 positiveInfinity: "+Infinity", negativeInfinity: "-Infinity", nan: "Nan"
             ),
-            timeout: TimeInterval? = nil
+            timeout: TimeInterval? = nil,
+            logger: ApiLogger? = nil
         ) {
             self.baseURL = baseURL
             self.urlSession = urlSession
@@ -20,6 +21,7 @@ public extension Client {
             self.dateDecodingStrategy = dateDecodingStrategy
             self.nonConformingFloatStrategy = nonConformingFloatStrategy
             self.timeout = timeout
+            self.logger = logger
         }
 
         public let baseURL: URL
@@ -29,6 +31,7 @@ public extension Client {
         public let dateDecodingStrategy: JSONDecoder.DateDecodingStrategy
         public let nonConformingFloatStrategy: JSONEncoder.NonConformingFloatEncodingStrategy
         public let timeout: TimeInterval?
+        let logger: ApiLogger?
     }
 }
 

@@ -5,12 +5,11 @@ import SwiftUI
 extension Client.Request {
     private func logResponse(of url: URL?, with status: Client.HttpStatusCode) {
         let path = url != nil ? "\(url?.path ?? "") " : ""
-        Client.ClientLogger.shared.info("✅ [\(status.rawValue)] \(path)")
+        config?.logger?.info("✅ [\(status.rawValue)] \(path)")
     }
 
     public func dispatch<Model: Decodable>() async throws -> Model? {
-        Client.ClientLogger.shared.info(self)
-
+        config?.logger?.info(self)
         // Make the request
         do {
             guard let config = config else {
@@ -32,7 +31,8 @@ extension Client.Request {
                 let credentialsProvider = config.credentialsProvider,
                 let newCredentials = await credentialsProvider.fetchNewCredentials()
             {
-                Client.ClientLogger.shared.info("🔑 Received new token")
+                config.logger?.info("🔑 Received new token")
+
                 await config.credentialsProvider?.setCredentials(to: newCredentials)
 
                 // Make the requeat again

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1E863F372ACD40BD0011C21E /* WebSocketContentVIew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E863F362ACD40BD0011C21E /* WebSocketContentVIew.swift */; };
+		1E94CC2C2EB4A22A00F82719 /* NiceToHave in Frameworks */ = {isa = PBXBuildFile; productRef = 1E94CC2B2EB4A22A00F82719 /* NiceToHave */; };
+		1E94CC2F2EB4A23C00F82719 /* NiceToHave in Frameworks */ = {isa = PBXBuildFile; productRef = 1E94CC2E2EB4A23C00F82719 /* NiceToHave */; };
 		E65469A6280B0A4700EEBB5B /* ExampleProjectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E65469A5280B0A4700EEBB5B /* ExampleProjectApp.swift */; };
 		E65469A8280B0A4700EEBB5B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E65469A7280B0A4700EEBB5B /* ContentView.swift */; };
 		E65469AA280B0A4800EEBB5B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E65469A9280B0A4800EEBB5B /* Assets.xcassets */; };
@@ -31,6 +33,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E94CC2F2EB4A23C00F82719 /* NiceToHave in Frameworks */,
+				1E94CC2C2EB4A22A00F82719 /* NiceToHave in Frameworks */,
 				E65469B9280B123A00EEBB5B /* LindebrosApiClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -110,6 +114,8 @@
 			name = ExampleProject;
 			packageProductDependencies = (
 				E65469B8280B123A00EEBB5B /* LindebrosApiClient */,
+				1E94CC2B2EB4A22A00F82719 /* NiceToHave */,
+				1E94CC2E2EB4A23C00F82719 /* NiceToHave */,
 			);
 			productName = ExampleProject;
 			productReference = E65469A2280B0A4700EEBB5B /* ExampleProject.app */;
@@ -139,6 +145,9 @@
 				Base,
 			);
 			mainGroup = E6546999280B0A4700EEBB5B;
+			packageReferences = (
+				1E94CC2D2EB4A23C00F82719 /* XCRemoteSwiftPackageReference "SwiftNiceToHave" */,
+			);
 			productRefGroup = E65469A3280B0A4700EEBB5B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -313,6 +322,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.LindebrosHomeAssistant.ExampleProject;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -343,6 +353,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.LindebrosHomeAssistant.ExampleProject;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -375,7 +386,27 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		1E94CC2D2EB4A23C00F82719 /* XCRemoteSwiftPackageReference "SwiftNiceToHave" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/andylindebros/SwiftNiceToHave";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.6;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		1E94CC2B2EB4A22A00F82719 /* NiceToHave */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NiceToHave;
+		};
+		1E94CC2E2EB4A23C00F82719 /* NiceToHave */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1E94CC2D2EB4A23C00F82719 /* XCRemoteSwiftPackageReference "SwiftNiceToHave" */;
+			productName = NiceToHave;
+		};
 		E65469B8280B123A00EEBB5B /* LindebrosApiClient */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LindebrosApiClient;

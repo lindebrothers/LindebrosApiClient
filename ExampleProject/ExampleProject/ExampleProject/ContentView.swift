@@ -1,14 +1,19 @@
 import LindebrosApiClient
 import SwiftUI
+import NiceToHave
+
+extension Logger: @retroactive ApiLogger {}
 
 @MainActor
 struct ContentView: View {
     let client: Client
+    static let logger = Logger()
     init() {
         client = Client(
             configuration: Client.Configuration(
-                baseURL: URL(string: "https://foaas.com")!
-            )
+                baseURL: URL(string: "https://foaas.com")!,
+                logger: Self.logger
+            ),
         )
     }
 
@@ -22,6 +27,7 @@ struct ContentView: View {
                     self.state = .success(model)
                 }
             } catch {
+                Self.logger.error("Failed to fetch with error", error)
                 self.state = .error(error)
             }
         }
