@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1E863F372ACD40BD0011C21E /* WebSocketContentVIew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E863F362ACD40BD0011C21E /* WebSocketContentVIew.swift */; };
 		1E94CC2C2EB4A22A00F82719 /* NiceToHave in Frameworks */ = {isa = PBXBuildFile; productRef = 1E94CC2B2EB4A22A00F82719 /* NiceToHave */; };
 		1E94CC2F2EB4A23C00F82719 /* NiceToHave in Frameworks */ = {isa = PBXBuildFile; productRef = 1E94CC2E2EB4A23C00F82719 /* NiceToHave */; };
 		E65469A6280B0A4700EEBB5B /* ExampleProjectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E65469A5280B0A4700EEBB5B /* ExampleProjectApp.swift */; };
@@ -18,7 +17,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1E863F362ACD40BD0011C21E /* WebSocketContentVIew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketContentVIew.swift; sourceTree = "<group>"; };
 		E65469A2280B0A4700EEBB5B /* ExampleProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExampleProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E65469A5280B0A4700EEBB5B /* ExampleProjectApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleProjectApp.swift; sourceTree = "<group>"; };
 		E65469A7280B0A4700EEBB5B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -68,7 +66,6 @@
 				E65469A9280B0A4800EEBB5B /* Assets.xcassets */,
 				E65469AE280B0A4800EEBB5B /* ExampleProject.entitlements */,
 				E65469AB280B0A4800EEBB5B /* Preview Content */,
-				1E863F362ACD40BD0011C21E /* WebSocketContentVIew.swift */,
 			);
 			path = ExampleProject;
 			sourceTree = "<group>";
@@ -174,7 +171,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E863F372ACD40BD0011C21E /* WebSocketContentVIew.swift in Sources */,
 				E65469A8280B0A4700EEBB5B /* ContentView.swift in Sources */,
 				E65469A6280B0A4700EEBB5B /* ExampleProjectApp.swift in Sources */,
 			);

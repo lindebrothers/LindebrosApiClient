@@ -2,7 +2,7 @@ import Foundation
 
 public extension Client {
     struct Response<Model: Sendable>: Sendable {
-        public let model: Model?
+        public let model: Model
         public let status: HttpStatusCode
     }
 

@@ -76,5 +76,12 @@ public extension Client {
             }
             return true
         }
+
+        var logIcon: String {
+            if rawValue == 0 || rawValue >= 400 {
+                return "❌"
+            }
+            return "✅"
+        }
     }
 }

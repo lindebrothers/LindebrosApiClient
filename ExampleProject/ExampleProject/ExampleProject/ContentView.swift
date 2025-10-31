@@ -6,12 +6,12 @@ extension Logger: @retroactive ApiLogger {}
 
 @MainActor
 struct ContentView: View {
-    let client: Client
+    let client: ClientProvider
     static let logger = Logger()
     init() {
         client = Client(
             configuration: Client.Configuration(
-                baseURL: URL(string: "https://foaas.com")!,
+                baseURL: URL(string: "http://127.0.0.1:8080")!,
                 logger: Self.logger
             ),
         )
@@ -23,9 +23,21 @@ struct ContentView: View {
         state = .loading
         Task {
             do {
-                if let model: TestModel = try await self.client.get("/awesome/LindebrosApiClient").dispatch() {
-                    self.state = .success(model)
+                let models: [TestModel] = try await self.client.get("/test").dispatch()
+                guard let model = models.first else {
+                    throw NSError(domain: "Could not find any models", code: 500)
                 }
+                self.state = .success(model)
+                Self.logger.debug("Great success received", model)
+
+                let newModel: TestModel = try await client.post(model, to: "/test", loggingStrategy: .raw).dispatch()
+
+                Self.logger.debug("Great success received new Model", newModel)
+
+                try await client.delete("/test").dispatch()
+
+                Self.logger.debug("Great success testing delete request")
+
             } catch {
                 Self.logger.error("Failed to fetch with error", error)
                 self.state = .error(error)
@@ -41,7 +53,7 @@ struct ContentView: View {
             case .loading:
                 ProgressView()
             case let .success(model):
-                Text(model.message)
+                Text(model.title)
             case let .error(error):
                 Text(error.localizedDescription)
             }
@@ -55,8 +67,8 @@ struct ContentView: View {
     }
 
     struct TestModel: Codable {
-        var message: String
-        var subtitle: String
+        var title: String
+        var description: String
     }
 
     enum ViewState {

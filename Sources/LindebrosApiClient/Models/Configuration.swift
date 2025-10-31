@@ -6,54 +6,94 @@ public extension Client {
             baseURL: URL,
             credentialsProvider: CredentialsProvider? = nil,
             urlSession: URLSessionProvider = URLSession.shared,
-            keydecodingStrategy: JSONDecoder.KeyDecodingStrategy = .convertFromSnakeCase,
-            dateDecodingStrategy: JSONDecoder.DateDecodingStrategy = .iso8601,
-            nonConformingFloatStrategy: JSONEncoder.NonConformingFloatEncodingStrategy = .convertToString(
-                positiveInfinity: "+Infinity", negativeInfinity: "-Infinity", nan: "Nan"
-            ),
+            encodingConfig: [EncodingConfigType] = [
+                .nonConformingFloatStrategy(.convertToString(
+                    positiveInfinity: "+Infinity", negativeInfinity: "-Infinity", nan: "Nan"
+                )),
+                .keyEncodingStrategy(.useDefaultKeys),
+                .dateEncodingStrategy(.iso8601)
+            ],
+            decodingConfig: [DecodingConfigType] = [
+                .nonConformingFloatStrategy(.convertFromString(
+                    positiveInfinity: "+Infinity", negativeInfinity: "-Infinity", nan: "Nan"
+                )),
+                .keydecodingStrategy(.useDefaultKeys),
+                .dateDecodingStrategy(.deferredToDate)
+            ],
             timeout: TimeInterval? = nil,
-            logger: ApiLogger? = nil
+            logger: ApiLogger? = nil,
+            loggingStrategy: LoggingStrategy = .normal
         ) {
             self.baseURL = baseURL
             self.urlSession = urlSession
             self.credentialsProvider = credentialsProvider
-            self.keydecodingStrategy = keydecodingStrategy
-            self.dateDecodingStrategy = dateDecodingStrategy
-            self.nonConformingFloatStrategy = nonConformingFloatStrategy
             self.timeout = timeout
             self.logger = logger
+            self.encodingConfig = encodingConfig
+            self.decodingConfig = decodingConfig
+            self.loggingStrategy = loggingStrategy
         }
 
         public let baseURL: URL
         public let credentialsProvider: CredentialsProvider?
         public let urlSession: URLSessionProvider
-        public let keydecodingStrategy: JSONDecoder.KeyDecodingStrategy
-        public let dateDecodingStrategy: JSONDecoder.DateDecodingStrategy
-        public let nonConformingFloatStrategy: JSONEncoder.NonConformingFloatEncodingStrategy
+        public let encodingConfig: [EncodingConfigType]
+        public let decodingConfig: [DecodingConfigType]
         public let timeout: TimeInterval?
+        public let loggingStrategy: LoggingStrategy
+
         let logger: ApiLogger?
     }
-}
 
-public extension WebSocketClient {
-    struct Configuration: Sendable {
-        public init(
-            pingPongType: WebSocketClient.PingPongType = .timeInterval(500),
-            urlSessionConfig: URLSessionConfiguration = URLSessionConfiguration.default,
-            verbose: Bool = true
-        ) {
-            self.pingPongType = pingPongType
-            self.urlSessionConfig = urlSessionConfig
-            self.verbose = verbose
+    enum EncodingConfigType: Sendable {
+        case contentType(Client.ContentType)
+        case keyEncodingStrategy(JSONEncoder.KeyEncodingStrategy)
+        case dateEncodingStrategy(JSONEncoder.DateEncodingStrategy)
+        case nonConformingFloatStrategy(JSONEncoder.NonConformingFloatEncodingStrategy)
+
+        var isContentType: Bool {
+            if case .contentType = self {
+                return true
+            }
+            return false
         }
 
-        public let urlSessionConfig: URLSessionConfiguration
-        public let pingPongType: PingPongType
-        public let verbose: Bool
+        func populateValues(to encoder: JSONEncoder) {
+            switch self {
+            case let .keyEncodingStrategy(value):
+                encoder.keyEncodingStrategy = value
+            case let .dateEncodingStrategy(value):
+                encoder.dateEncodingStrategy = value
+            case let .nonConformingFloatStrategy(value):
+                encoder.nonConformingFloatEncodingStrategy = value
+            case .contentType:
+                break
+            }
+        }
+
+        var contentType: Client.ContentType? {
+            if case let .contentType(type) = self {
+                return type
+            }
+            return nil
+        }
     }
 
-    enum PingPongType: Sendable {
-        case none
-        case timeInterval(TimeInterval)
+    enum DecodingConfigType: Sendable {
+        case keydecodingStrategy(JSONDecoder.KeyDecodingStrategy)
+        case dateDecodingStrategy(JSONDecoder.DateDecodingStrategy)
+        case nonConformingFloatStrategy(JSONDecoder.NonConformingFloatDecodingStrategy)
+        func populateValues(to decoder: JSONDecoder) {
+            switch self {
+            case let .keydecodingStrategy(value):
+                decoder.keyDecodingStrategy = value
+            case let .dateDecodingStrategy(value):
+                decoder.dateDecodingStrategy = value
+            case let .nonConformingFloatStrategy(value):
+                decoder.nonConformingFloatDecodingStrategy = value
+            }
+        }
     }
+
+    
 }

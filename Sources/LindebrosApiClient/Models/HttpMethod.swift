@@ -11,6 +11,9 @@ public extension Client {
         /// The ApiClient makes a PUT request with a body containg data to be sent to the API
         case put = "PUT"
 
+        /// The ApiClient makes a PATCH request with a body containg data to be sent to the API
+        case patch = "PATCH"
+
         /// The ApiClient makes a DELETE request with a body containg data to be sent to the API
         case delete = "DELETE"
     }

@@ -3,13 +3,59 @@ import Foundation
 import SwiftUI
 
 extension Client.Request {
-    private func logResponse(of url: URL?, with status: Client.HttpStatusCode) {
-        let path = url != nil ? "\(url?.path ?? "") " : ""
-        config?.logger?.info("✅ [\(status.rawValue)] \(path)")
+    private func logResponse(url: URL?, httpStatus: Client.HttpStatusCode, resp: HTTPURLResponse?, data: Data?) {
+        switch loggingStrategy ?? config?.loggingStrategy ?? .none {
+        case .normal:
+            config?.logger?.info("\(httpStatus.logIcon) [\(httpStatus.rawValue)] \(url?.path ?? "")", file: "LindebrosApiClient", line: 0)
+        case .raw:
+            let method = Client.HttpMethod(rawValue: urlRequest?.httpMethod ?? "unknown")
+            config?.logger?.info("""
+
+            Response:
+            \(httpStatus.logIcon) [\(method?.rawValue ?? "unknown")] \(url?.path ?? "")
+            \(resp?.getHeaders().joined(separator: "\n") ?? "")
+
+            \(resp?.getJSONBody(with: data) ?? "")
+            """, file: "LindebrosApiClient", line: 0)
+        default:
+            break
+        }
     }
 
-    public func dispatch<Model: Decodable>() async throws -> Model? {
-        config?.logger?.info(self)
+    private func logRequest() {
+        guard
+            let urlRequest = urlRequest,
+            let url = urlRequest.url,
+            let method = Client.HttpMethod(rawValue: urlRequest.httpMethod ?? "unknown")
+        else { return}
+
+        let token = urlRequest.value(forHTTPHeaderField: "Authorization")
+
+        switch loggingStrategy ?? config?.loggingStrategy ?? .none {
+        case .raw:
+            config?.logger?.info("""
+
+            Request:
+
+            \(method.rawValue) \(url)
+            \(getHeaders().joined(separator: "\n"))
+
+            \(getJSONBody() ?? "")
+            """, file: "LindebrosApiClient", line: 0)
+
+        case .normal:
+            config?.logger?.info("📤 [\(method.rawValue)] \(url.path) \(url.query ?? "") \(token ?? "")", file: "LindebrosApiClient", line: 0)
+        default:
+            break
+        }
+    }
+
+    public func dispatch() async throws {
+        let _ : Client.EmptyResponse = try await dispatch()
+    }
+
+    public func dispatch<Model: Decodable>() async throws -> Model {
+        logRequest()
         // Make the request
         do {
             guard let config = config else {
@@ -18,7 +64,6 @@ extension Client.Request {
 
             let response: Client.Response<Model> = try await asyncRequest(urlSession: config.urlSession)
 
-            logResponse(of: urlRequest?.url, with: response.status)
             return response.model
 
         } catch let e {
@@ -37,7 +82,6 @@ extension Client.Request {
 
                 // Make the requeat again
                 let response: Client.Response<Model> = try await authenticate(by: config.credentialsProvider?.provideCredentials()).asyncRequest(urlSession: config.urlSession)
-                logResponse(of: urlRequest?.url, with: response.status)
                 return response.model
             }
 
@@ -67,19 +111,18 @@ public extension Client.Request {
         let httpStatus = Client.HttpStatusCode(rawValue: response?.statusCode ?? 0) ?? .unknown
 
         let jsonDecoder = JSONDecoder()
-        if let strategy = config?.nonConformingFloatStrategy, case let JSONEncoder.NonConformingFloatEncodingStrategy.convertToString(positiveInfinity, negativeInfinity, nan) = strategy {
-            jsonDecoder.nonConformingFloatDecodingStrategy = .convertFromString(positiveInfinity: positiveInfinity, negativeInfinity: negativeInfinity, nan: nan)
+        (decodingOptions ?? []).forEach { option in
+            option.populateValues(to: jsonDecoder)
         }
-        jsonDecoder.keyDecodingStrategy = config?.keydecodingStrategy ?? .convertFromSnakeCase
-        jsonDecoder.dateDecodingStrategy = config?.dateDecodingStrategy ?? .deferredToDate
+
+        logResponse(url: urlRequest.url, httpStatus: httpStatus, resp: response, data: data)
+
         if httpStatus.isOk() {
-            if data.count > 0 {
-                return try Client.Response(
-                    model: jsonDecoder.decode(Model.self, from: data),
-                    status: httpStatus
-                )
+            if data.isEmpty {
+                return try Client.Response(model: JSONDecoder().decodeIfEmpty(Model.self), status: httpStatus)
+            } else {
+                return try Client.Response(model: jsonDecoder.decode(Model.self, from: data), status: httpStatus)
             }
-            return Client.Response(model: nil, status: httpStatus)
         }
 
         throw Client.ErrorResponse(message: "Service responded with error", status: httpStatus, data: data)
@@ -96,7 +139,7 @@ public extension Client.Request {
 
         urlRequest.url = newURL
 
-        return clone(with: urlRequest, andConfig: config)
+        return clone(with: urlRequest)
     }
 }
 
@@ -107,8 +150,8 @@ extension Client.Request {
         return Client.ContentType(rawValue: contentType)
     }
 
-    func clone(with urlRequest: URLRequest, andConfig config: Client.Configuration?) -> Self {
-        Client.Request(urlRequest: urlRequest, config: config)
+    func clone(with urlRequest: URLRequest, andConfig config: Client.Configuration? = nil, decodingOptions: [Client.DecodingConfigType]? = nil, loggingStrategy: LoggingStrategy? = nil) -> Self {
+        Client.Request(urlRequest: urlRequest, config: config ?? self.config, decodingOptions: decodingOptions ?? self.decodingOptions, loggingStrategy: loggingStrategy ?? self.loggingStrategy)
     }
 
     func updateURL(with newQuery: QuerystringState) -> URL? {
@@ -131,5 +174,19 @@ extension Client.Request {
             return "\(port)"
         }
         return ""
+    }
+
+    private func getJSONBody() -> String? {
+        guard let data = urlRequest?.httpBody else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func getHeaders() -> [String] {
+        if let headers = urlRequest?.allHTTPHeaderFields {
+            return headers.map { key, value in
+                "\(key): \(value)"
+            }
+        }
+        return []
     }
 }

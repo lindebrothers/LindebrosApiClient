@@ -1,13 +1,43 @@
 import Foundation
 
 public protocol ClientProvider: Sendable {
-    func get(_ endpoint: String, with state: QuerystringState?) async -> Client.Request
+    func get(_ endpoint: String, with state: QuerystringState?, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) async -> Client.Request
 
-    func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, contentType: Client.ContentType) async -> Client.Request
+    func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, encodingConfig: [Client.EncodingConfigType]?, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) async -> Client.Request
 
-    func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, contentType: Client.ContentType) async -> Client.Request
+    func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, encodingConfig: [Client.EncodingConfigType]?, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) async -> Client.Request
 
-    func delete(_ endpoint: String, with state: QuerystringState?) async -> Client.Request
+    func patch<PutModel: Encodable>(_ model: PutModel, to endpoint: String, encodingConfig: [Client.EncodingConfigType]?, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) async -> Client.Request
+
+    func delete(_ endpoint: String, with state: QuerystringState?, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) async -> Client.Request
+
+    func endpoint(_ endpoint: String, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) -> Client.Request
+}
+
+public extension ClientProvider {
+    func get(_ endpoint: String, with state: QuerystringState? = nil, decodingOptions: [Client.DecodingConfigType]? = nil, loggingStrategy: LoggingStrategy? = nil) async -> Client.Request {
+        await get(endpoint, with: state, decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
+    }
+
+    func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, encodingConfig: [Client.EncodingConfigType]? = nil, decodingOptions: [Client.DecodingConfigType]? = nil, loggingStrategy: LoggingStrategy? = nil) async -> Client.Request {
+        await post(model, to: endpoint, encodingConfig: encodingConfig, decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
+    }
+
+    func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, encodingConfig: [Client.EncodingConfigType]? = nil, decodingOptions: [Client.DecodingConfigType]? = nil, loggingStrategy: LoggingStrategy? = nil) async -> Client.Request {
+        await put(model, to: endpoint, encodingConfig: encodingConfig, decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
+    }
+
+    func patch<PutModel: Encodable>(_ model: PutModel, to endpoint: String, encodingConfig: [Client.EncodingConfigType]? = nil, decodingOptions: [Client.DecodingConfigType]? = nil, loggingStrategy: LoggingStrategy? = nil) async -> Client.Request {
+        await patch(model, to: endpoint, encodingConfig: encodingConfig, decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
+    }
+
+    func delete(_ endpoint: String, with state: QuerystringState? = nil, decodingOptions: [Client.DecodingConfigType]? = nil, loggingStrategy: LoggingStrategy? = nil) async -> Client.Request {
+        await delete(endpoint, with: state, decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
+    }
+
+    func endpoint(_ endpointStr: String, decodingOptions: [Client.DecodingConfigType]? = nil, loggingStrategy: LoggingStrategy? = nil) -> Client.Request {
+        endpoint(endpointStr, decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
+    }
 }
 
 public struct Client: ClientProvider {
@@ -35,8 +65,8 @@ public struct Client: ClientProvider {
      - parameter with state: Querystring parameter representation
      - returns Model with populated data
      */
-    public func get(_ endpoint: String, with state: QuerystringState? = nil) async -> Request {
-        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+    public func get(_ endpoint: String, with state: QuerystringState?, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) async -> Request {
+        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL), decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
             .authenticate(by: await configuration.credentialsProvider?.provideCredentials())
             .setQueryIfNeeded(with: state)
             .setMethod(.get)
@@ -48,15 +78,15 @@ public struct Client: ClientProvider {
      makes a POST request
      - parameter model: The data to send
      - parameter to endpoint: Path to endpoint
-     - parameter contentType: The type of data, json or form.
+     - parameter encodingConfig: Encoding options
      - returns Model with populated data
      */
-    public func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, contentType: ContentType = .json) async -> Request {
-        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+    public func post<PostModel: Encodable>(_ model: PostModel, to endpoint: String, encodingConfig: [Client.EncodingConfigType]?, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) async -> Request {
+        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL), decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
             .authenticate(by: await configuration.credentialsProvider?.provideCredentials())
             .setMethod(.post)
-            .setContentType(contentType)
-            .setBody(model: model)
+            .setContentType(encodingConfig?.first(where: { $0.isContentType })?.contentType ?? .json)
+            .setBody(model: model, encodingConfig: encodingConfig)
             .setAcceptJSON()
             .setConfig(configuration)
     }
@@ -65,15 +95,32 @@ public struct Client: ClientProvider {
      makes a PUT request
      - parameter model: The data to send
      - parameter to endpoint: Path to endpoint
-     - parameter contentType: The type of data, json or form.
+     - parameter encodingConfig: Encoding options
      - returns Model with populated data
      */
-    public func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, contentType: ContentType = .json) async -> Request {
-        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+    public func put<PutModel: Encodable>(_ model: PutModel, to endpoint: String, encodingConfig: [Client.EncodingConfigType]?, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) async -> Request {
+        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL), decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
             .authenticate(by: await configuration.credentialsProvider?.provideCredentials())
             .setMethod(.put)
-            .setContentType(contentType)
-            .setBody(model: model)
+            .setContentType(encodingConfig?.first(where: { $0.isContentType })?.contentType ?? .json)
+            .setBody(model: model, encodingConfig: encodingConfig)
+            .setAcceptJSON()
+            .setConfig(configuration)
+    }
+
+    /**
+     makes a PATCH request
+     - parameter model: The data to send
+     - parameter to endpoint: Path to endpoint
+     - parameter encodingConfig: Encoding options
+     - returns Model with populated data
+     */
+    public func patch<PutModel: Encodable>(_ model: PutModel, to endpoint: String, encodingConfig: [Client.EncodingConfigType]?, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) async -> Request {
+        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL), decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
+            .authenticate(by: await configuration.credentialsProvider?.provideCredentials())
+            .setMethod(.patch)
+            .setContentType(encodingConfig?.first(where: { $0.isContentType })?.contentType ?? .json)
+            .setBody(model: model, encodingConfig: encodingConfig)
             .setAcceptJSON()
             .setConfig(configuration)
     }
@@ -84,13 +131,17 @@ public struct Client: ClientProvider {
      - parameter with state: Querystring parameter representation
      - returns Model with populated data
      */
-    public func delete(_ endpoint: String, with state: QuerystringState? = nil) async -> Request {
-        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
-            .authenticate(by: await configuration.credentialsProvider?.provideCredentials())
-            .setQueryIfNeeded(with: state)
-            .setMethod(.delete)
-            .setAcceptJSON()
-            .setConfig(configuration)
+    public func delete(_ endpoint: String, with state: QuerystringState? = nil, decodingOptions: [Client.DecodingConfigType]?, loggingStrategy: LoggingStrategy?) async -> Request {
+        Request(
+            url: URL(string: endpoint, relativeTo: configuration.baseURL),
+            decodingOptions: decodingOptions,
+            loggingStrategy: loggingStrategy
+        )
+        .authenticate(by: await configuration.credentialsProvider?.provideCredentials())
+        .setQueryIfNeeded(with: state)
+        .setMethod(.delete)
+        .setAcceptJSON()
+        .setConfig(configuration)
     }
 
     /**
@@ -98,7 +149,7 @@ public struct Client: ClientProvider {
      - parameter endpoint: Path to endpoint
      - returns a Request
      */
-    public func endpoint(_ endpoint: String) async -> Request {
-        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL))
+    public func endpoint(_ endpoint: String, decodingOptions: [Client.DecodingConfigType]? = nil, loggingStrategy: LoggingStrategy?) -> Request {
+        Request(url: URL(string: endpoint, relativeTo: configuration.baseURL), decodingOptions: decodingOptions, loggingStrategy: loggingStrategy)
     }
 }

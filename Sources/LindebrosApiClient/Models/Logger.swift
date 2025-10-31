@@ -21,3 +21,9 @@ extension ApiLogger {
         error(values, file: file, line: line)
     }
 }
+
+public enum LoggingStrategy: Sendable {
+    case normal
+    case raw
+    case none
+}
