@@ -12,7 +12,7 @@ extension Client.Request {
             config?.logger?.info("""
 
             Response:
-            \(httpStatus.logIcon) [\(method?.rawValue ?? "unknown")] \(url?.path ?? "")
+            \(httpStatus.logIcon) \(httpStatus.rawValue) [\(method?.rawValue ?? "unknown")] \(url?.path ?? "")
             \(resp?.getHeaders().joined(separator: "\n") ?? "")
 
             \(resp?.getJSONBody(with: data) ?? "")
